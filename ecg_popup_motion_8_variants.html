@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>ECG popup — 8 variações de motion</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px;
+    background: #eef1f4;
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #2c2c2a;
+    margin: 0 0 20px;
+  }
+  .screen {
+    width: 100%;
+    max-width: 900px;
+    background: #141414;
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .patient {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .patient .icon {
+    color: #e8e8e8;
+    font-size: 20px;
+  }
+  .patient .name {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #f4f4f4;
+  }
+  .patient .id {
+    margin: 1px 0 0;
+    font-size: 12px;
+    color: #8a8a86;
+  }
+  .hr {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #f4f4f4;
+  }
+  .hr svg { fill: #e08a3c; width: 15px; height: 15px; }
+  .ecg-wrap {
+    position: relative;
+    height: 220px;
+  }
+  .ecg-wrap svg.trace { width: 100%; height: 100%; display: block; }
+  .toast {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    background: #1f2733;
+    border: 0.5px solid #33455c;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    opacity: 0;
+  }
+  .toast .info-icon {
+    color: #7fa8d9;
+    font-size: 18px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .toast .body { flex: 1; }
+  .toast .title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #eef3fa;
+    line-height: 1.4;
+  }
+  .toast .desc {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #a9b9cc;
+    line-height: 1.5;
+  }
+  .toast .close {
+    color: #7f8ea3;
+    font-size: 15px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-width: 900px;
+    width: 100%;
+    margin-top: 18px;
+  }
+  button {
+    font-size: 13px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 0.5px solid #c9c7bd;
+    background: #ffffff;
+    color: #2c2c2a;
+    cursor: pointer;
+  }
+  button:hover { background: #f1efe8; }
+  button:active { transform: scale(0.98); }
+  .legend {
+    max-width: 900px;
+    width: 100%;
+    margin-top: 24px;
+    font-size: 13px;
+    color: #5f5e5a;
+  }
+  .legend table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .legend th, .legend td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid #d8d6cc;
+  }
+  .legend th { color: #2c2c2a; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<h1>Notificação de exame sincronizado — 8 variações de motion</h1>
+
+<div class="screen">
+  <div class="topbar">
+    <div class="patient">
+      <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e8e8e8" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      <div>
+        <p class="name">John Doe Oliver</p>
+        <p class="id">ID 123456</p>
+      </div>
+    </div>
+    <div class="hr">
+      <svg viewBox="0 0 24 24"><path d="M12 21s-6.7-4.35-9.3-8.1C.8 9.9 1.6 6.3 4.6 5c2.3-1 4.7-.1 6 1.7C11.9 4.9 14.3 4 16.6 5c3 1.3 3.8 4.9 1.9 7.9C18.7 16.65 12 21 12 21z"/></svg>
+      85
+    </div>
+  </div>
+
+  <div class="ecg-wrap">
+    <svg class="trace" viewBox="0 0 900 220" preserveAspectRatio="none">
+      <polyline id="line1" points="" fill="none" stroke="#e8e8e8" stroke-width="1.5"/>
+      <polyline id="line2" points="" fill="none" stroke="#e8e8e8" stroke-width="1.5"/>
+      <polyline id="line3" points="" fill="none" stroke="#e8e8e8" stroke-width="1.5"/>
+    </svg>
+
+    <div class="toast" id="toast">
+      <svg class="info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.5" fill="currentColor"/></svg>
+      <div class="body">
+        <p class="title">Exam synced</p>
+        <p class="desc">Lead V1 finished transmitting.</p>
+      </div>
+      <svg class="close" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button onclick="play(1)">1. Fade + subida</button>
+  <button onclick="play(2)">2. Slide lateral</button>
+  <button onclick="play(3)">3. Scale pop</button>
+  <button onclick="play(4)">4. Fade puro</button>
+  <button onclick="play(5)">5. Slide de cima</button>
+  <button onclick="play(6)">6. Slide de baixo</button>
+  <button onclick="play(7)">7. Spring bounce</button>
+  <button onclick="play(8)">8. Expansão de canto</button>
+</div>
+
+<div class="legend">
+  <table>
+    <tr><th>#</th><th>Motion</th><th>Referência de uso</th><th>Sensação</th></tr>
+    <tr><td>1</td><td>Fade + subida</td><td>Padrão atual do Figma</td><td>Suave, discreto</td></tr>
+    <tr><td>2</td><td>Slide lateral</td><td>Toasts genéricos (Slack, Gmail)</td><td>Familiar, neutro</td></tr>
+    <tr><td>3</td><td>Scale pop</td><td>Cards e modais leves</td><td>Levemente lúdico</td></tr>
+    <tr><td>4</td><td>Fade puro</td><td>iOS / macOS notification center</td><td>Muito discreto</td></tr>
+    <tr><td>5</td><td>Slide de cima</td><td>Banners de sistema (Android, Chrome)</td><td>Sugere origem no topo</td></tr>
+    <tr><td>6</td><td>Slide de baixo</td><td>Snackbars (Material Design)</td><td>Familiar em mobile</td></tr>
+    <tr><td>7</td><td>Spring bounce</td><td>iOS toasts, apps modernos</td><td>Chamativo, "vivo"</td></tr>
+    <tr><td>8</td><td>Expansão de canto</td><td>Notificações de desktop</td><td>Reforça o canto de origem</td></tr>
+  </table>
+</div>
+
+<script>
+function buildFlatLine(w, mid) {
+  let pts = [];
+  for (let x = 0; x <= w; x += 3) pts.push([x, mid]);
+  return pts;
+}
+
+function beatOffset(t) {
+  const cycle = 90;
+  const p = t % cycle;
+  if (p < 4) return -6 * (p/4);
+  if (p < 8) return -6 + 46 * ((p-4)/4);
+  if (p < 12) return 40 - 50 * ((p-8)/4);
+  if (p < 16) return -10 + 10 * ((p-12)/4);
+  return 0;
+}
+
+const lines = [
+  { el: document.getElementById('line1'), mid: 30, phase: 0 },
+  { el: document.getElementById('line2'), mid: 110, phase: 20 },
+  { el: document.getElementById('line3'), mid: 190, phase: 45 }
+];
+const W = 900;
+lines.forEach(l => { l.pts = buildFlatLine(W, l.mid); });
+
+let frame = 0;
+function tick() {
+  frame += 3;
+  lines.forEach(l => {
+    l.pts.shift();
+    l.pts.push([W, l.mid + beatOffset(frame + l.phase)]);
+    l.el.setAttribute('points', l.pts.map((p, i) => (i*3) + ',' + p[1]).join(' '));
+  });
+  requestAnimationFrame(tick);
+}
+tick();
+
+const toast = document.getElementById('toast');
+
+const motions = {
+  1: { inStart: 'translateY(-10px)', inDur: '0.4s', inEase: 'ease-out', outEnd: 'translateY(-6px)', outDur: '0.4s', outEase: 'ease-in' },
+  2: { inStart: 'translateX(40px)', inDur: '0.35s', inEase: 'cubic-bezier(0.2,0.7,0.3,1)', outEnd: 'translateX(40px)', outDur: '0.35s', outEase: 'ease-in' },
+  3: { inStart: 'scale(0.85)', inDur: '0.3s', inEase: 'cubic-bezier(0.34,1.56,0.64,1)', outEnd: 'scale(0.92)', outDur: '0.3s', outEase: 'ease-in' },
+  4: { inStart: 'translate(0,0)', inDur: '0.5s', inEase: 'ease-out', outEnd: 'translate(0,0)', outDur: '0.5s', outEase: 'ease-in' },
+  5: { inStart: 'translateY(-24px)', inDur: '0.38s', inEase: 'cubic-bezier(0.2,0.7,0.3,1)', outEnd: 'translateY(-16px)', outDur: '0.35s', outEase: 'ease-in' },
+  6: { inStart: 'translateY(24px)', inDur: '0.38s', inEase: 'cubic-bezier(0.2,0.7,0.3,1)', outEnd: 'translateY(16px)', outDur: '0.35s', outEase: 'ease-in' },
+  7: { inStart: 'translateX(50px) scale(0.9)', inDur: '0.55s', inEase: 'cubic-bezier(0.34,1.56,0.64,1)', outEnd: 'translateX(30px) scale(0.95)', outDur: '0.3s', outEase: 'ease-in' },
+  8: { inStart: 'scale(0.3)', inDur: '0.32s', inEase: 'cubic-bezier(0.16,1,0.3,1)', outEnd: 'scale(0.5)', outDur: '0.28s', outEase: 'ease-in', origin: 'top right' }
+};
+
+function play(id) {
+  const m = motions[id];
+  toast.style.transformOrigin = m.origin || 'center';
+  toast.style.transition = 'none';
+  toast.style.opacity = '0';
+  toast.style.transform = m.inStart;
+  void toast.offsetWidth;
+  toast.style.transition = 'opacity ' + m.inDur + ' ' + m.inEase + ', transform ' + m.inDur + ' ' + m.inEase;
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(0,0) scale(1)';
+  });
+  setTimeout(() => {
+    toast.style.transition = 'opacity ' + m.outDur + ' ' + m.outEase + ', transform ' + m.outDur + ' ' + m.outEase;
+    toast.style.opacity = '0';
+    toast.style.transform = m.outEnd;
+  }, 3000);
+}
+
+play(1);
+</script>
+
+</body>
+</html>
