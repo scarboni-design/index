@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ECG popup — 8 variações de motion</title>
+<title>Toast notification — approved animation</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -14,11 +14,16 @@
     flex-direction: column;
     align-items: center;
   }
+  .header {
+    max-width: 900px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
   h1 {
     font-size: 18px;
     font-weight: 500;
     color: #2c2c2a;
-    margin: 0 0 20px;
+    margin: 0 0 4px;
   }
   .screen {
     width: 100%;
@@ -40,10 +45,7 @@
     align-items: center;
     gap: 10px;
   }
-  .patient .icon {
-    color: #e8e8e8;
-    font-size: 20px;
-  }
+  .patient .icon { color: #e8e8e8; }
   .patient .name {
     margin: 0;
     font-size: 15px;
@@ -85,7 +87,6 @@
   }
   .toast .info-icon {
     color: #7fa8d9;
-    font-size: 18px;
     margin-top: 1px;
     flex-shrink: 0;
   }
@@ -105,21 +106,20 @@
   }
   .toast .close {
     color: #7f8ea3;
-    font-size: 15px;
     flex-shrink: 0;
     cursor: pointer;
   }
+
   .controls {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
     max-width: 900px;
     width: 100%;
     margin-top: 18px;
+    display: flex;
+    justify-content: center;
   }
   button {
     font-size: 13px;
-    padding: 10px 8px;
+    padding: 10px 18px;
     border-radius: 8px;
     border: 0.5px solid #c9c7bd;
     background: #ffffff;
@@ -128,28 +128,92 @@
   }
   button:hover { background: #f1efe8; }
   button:active { transform: scale(0.98); }
-  .legend {
+
+  .specs {
     max-width: 900px;
     width: 100%;
-    margin-top: 24px;
-    font-size: 13px;
-    color: #5f5e5a;
+    margin-top: 28px;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    border: 0.5px solid #d8d6cc;
   }
-  .legend table {
+  .specs h2 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2c2c2a;
+    margin: 0 0 12px;
+  }
+  .specs table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 13px;
   }
-  .legend th, .legend td {
+  .specs th, .specs td {
     text-align: left;
     padding: 8px 10px;
-    border-bottom: 1px solid #d8d6cc;
+    border-bottom: 1px solid #eceae2;
+    color: #4a4944;
   }
-  .legend th { color: #2c2c2a; font-weight: 500; }
+  .specs th { color: #2c2c2a; font-weight: 500; width: 180px; }
+  code {
+    background: #f4f2ea;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12px;
+  }
+
+  .code-block {
+    max-width: 900px;
+    width: 100%;
+    margin-top: 20px;
+    background: #1c1c1c;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .code-block .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #262626;
+  }
+  .code-block .code-header span {
+    font-size: 12px;
+    color: #b7b7b3;
+    font-family: "SF Mono", Consolas, monospace;
+  }
+  .copy-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 0.5px solid #3d3d3a;
+    background: #333330;
+    color: #eceae2;
+  }
+  .copy-btn:hover { background: #3d3d3a; }
+  .copy-btn.copied { background: #1c7c4c; border-color: #1c7c4c; color: #fff; }
+  pre {
+    margin: 0;
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #e0e0da;
+  }
+  .tag { color: #7fa8d9; }
+  .attr { color: #d9b36c; }
+  .str { color: #a3c98a; }
+  .cmt { color: #7a7a76; }
 </style>
 </head>
 <body>
 
-<h1>Notificação de exame sincronizado — 8 variações de motion</h1>
+<div class="header">
+  <h1>Toast notification — enter / exit animation</h1>
+</div>
 
 <div class="screen">
   <div class="topbar">
@@ -185,28 +249,60 @@
 </div>
 
 <div class="controls">
-  <button onclick="play(1)">1. Fade + subida</button>
-  <button onclick="play(2)">2. Slide lateral</button>
-  <button onclick="play(3)">3. Scale pop</button>
-  <button onclick="play(4)">4. Fade puro</button>
-  <button onclick="play(5)">5. Slide de cima</button>
-  <button onclick="play(6)">6. Slide de baixo</button>
-  <button onclick="play(7)">7. Spring bounce</button>
-  <button onclick="play(8)">8. Expansão de canto</button>
+  <button onclick="play()">Play animation</button>
 </div>
 
-<div class="legend">
+<div class="specs">
+  <h2>Implementation spec</h2>
   <table>
-    <tr><th>#</th><th>Motion</th><th>Referência de uso</th><th>Sensação</th></tr>
-    <tr><td>1</td><td>Fade + subida</td><td>Padrão atual do Figma</td><td>Suave, discreto</td></tr>
-    <tr><td>2</td><td>Slide lateral</td><td>Toasts genéricos (Slack, Gmail)</td><td>Familiar, neutro</td></tr>
-    <tr><td>3</td><td>Scale pop</td><td>Cards e modais leves</td><td>Levemente lúdico</td></tr>
-    <tr><td>4</td><td>Fade puro</td><td>iOS / macOS notification center</td><td>Muito discreto</td></tr>
-    <tr><td>5</td><td>Slide de cima</td><td>Banners de sistema (Android, Chrome)</td><td>Sugere origem no topo</td></tr>
-    <tr><td>6</td><td>Slide de baixo</td><td>Snackbars (Material Design)</td><td>Familiar em mobile</td></tr>
-    <tr><td>7</td><td>Spring bounce</td><td>iOS toasts, apps modernos</td><td>Chamativo, "vivo"</td></tr>
-    <tr><td>8</td><td>Expansão de canto</td><td>Notificações de desktop</td><td>Reforça o canto de origem</td></tr>
+    <tr><th>Enter (in)</th><td>opacity 0 → 1, translateY <code>-10px → 0</code></td></tr>
+    <tr><th>Duration (in)</th><td><code>400ms</code></td></tr>
+    <tr><th>Easing (in)</th><td><code>ease-out</code></td></tr>
+    <tr><th>Visible time</th><td><code>~3000ms</code> before exit starts</td></tr>
+    <tr><th>Exit (out)</th><td>opacity 1 → 0, translateY <code>0 → -6px</code></td></tr>
+    <tr><th>Duration (out)</th><td><code>400ms</code></td></tr>
+    <tr><th>Easing (out)</th><td><code>ease-in</code></td></tr>
+    <tr><th>Manual dismiss</th><td>Clicking the X cancels the timer and immediately triggers the same exit animation</td></tr>
   </table>
+</div>
+
+<div class="code-block">
+  <div class="code-header">
+    <span>toast-animation.css + .js</span>
+    <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy code</button>
+  </div>
+  <pre id="codeToCopy"><span class="cmt">/* CSS */</span>
+<span class="tag">.toast</span> {
+  <span class="attr">opacity</span>: 0;
+  <span class="attr">transition</span>: <span class="str">none</span>;
+}
+
+<span class="cmt">/* JS — call showToast() to trigger */</span>
+<span class="tag">function</span> showToast(el) {
+  <span class="cmt">// reset to starting state</span>
+  el.style.transition = <span class="str">'none'</span>;
+  el.style.opacity = <span class="str">'0'</span>;
+  el.style.transform = <span class="str">'translateY(-10px)'</span>;
+  <span class="tag">void</span> el.offsetWidth; <span class="cmt">// force reflow</span>
+
+  <span class="cmt">// enter</span>
+  el.style.transition = <span class="str">'opacity 400ms ease-out, transform 400ms ease-out'</span>;
+  requestAnimationFrame(() => {
+    el.style.opacity = <span class="str">'1'</span>;
+    el.style.transform = <span class="str">'translateY(0)'</span>;
+  });
+
+  <span class="cmt">// exit after 3000ms visible</span>
+  setTimeout(() => {
+    el.style.transition = <span class="str">'opacity 400ms ease-in, transform 400ms ease-in'</span>;
+    el.style.opacity = <span class="str">'0'</span>;
+    el.style.transform = <span class="str">'translateY(-6px)'</span>;
+  }, 3000);
+}
+
+<span class="cmt">// Manual dismiss (X button): cancel timer, run exit immediately
+// implementation detail: store the setTimeout id and clearTimeout()
+// on click, then re-run the exit block above.</span></pre>
 </div>
 
 <script>
@@ -248,37 +344,39 @@ tick();
 
 const toast = document.getElementById('toast');
 
-const motions = {
-  1: { inStart: 'translateY(-10px)', inDur: '0.4s', inEase: 'ease-out', outEnd: 'translateY(-6px)', outDur: '0.4s', outEase: 'ease-in' },
-  2: { inStart: 'translateX(40px)', inDur: '0.35s', inEase: 'cubic-bezier(0.2,0.7,0.3,1)', outEnd: 'translateX(40px)', outDur: '0.35s', outEase: 'ease-in' },
-  3: { inStart: 'scale(0.85)', inDur: '0.3s', inEase: 'cubic-bezier(0.34,1.56,0.64,1)', outEnd: 'scale(0.92)', outDur: '0.3s', outEase: 'ease-in' },
-  4: { inStart: 'translate(0,0)', inDur: '0.5s', inEase: 'ease-out', outEnd: 'translate(0,0)', outDur: '0.5s', outEase: 'ease-in' },
-  5: { inStart: 'translateY(-24px)', inDur: '0.38s', inEase: 'cubic-bezier(0.2,0.7,0.3,1)', outEnd: 'translateY(-16px)', outDur: '0.35s', outEase: 'ease-in' },
-  6: { inStart: 'translateY(24px)', inDur: '0.38s', inEase: 'cubic-bezier(0.2,0.7,0.3,1)', outEnd: 'translateY(16px)', outDur: '0.35s', outEase: 'ease-in' },
-  7: { inStart: 'translateX(50px) scale(0.9)', inDur: '0.55s', inEase: 'cubic-bezier(0.34,1.56,0.64,1)', outEnd: 'translateX(30px) scale(0.95)', outDur: '0.3s', outEase: 'ease-in' },
-  8: { inStart: 'scale(0.3)', inDur: '0.32s', inEase: 'cubic-bezier(0.16,1,0.3,1)', outEnd: 'scale(0.5)', outDur: '0.28s', outEase: 'ease-in', origin: 'top right' }
-};
-
-function play(id) {
-  const m = motions[id];
-  toast.style.transformOrigin = m.origin || 'center';
+function play() {
   toast.style.transition = 'none';
   toast.style.opacity = '0';
-  toast.style.transform = m.inStart;
+  toast.style.transform = 'translateY(-10px)';
   void toast.offsetWidth;
-  toast.style.transition = 'opacity ' + m.inDur + ' ' + m.inEase + ', transform ' + m.inDur + ' ' + m.inEase;
+  toast.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
   requestAnimationFrame(() => {
     toast.style.opacity = '1';
-    toast.style.transform = 'translate(0,0) scale(1)';
+    toast.style.transform = 'translateY(0)';
   });
   setTimeout(() => {
-    toast.style.transition = 'opacity ' + m.outDur + ' ' + m.outEase + ', transform ' + m.outDur + ' ' + m.outEase;
+    toast.style.transition = 'opacity 0.4s ease-in, transform 0.4s ease-in';
     toast.style.opacity = '0';
-    toast.style.transform = m.outEnd;
+    toast.style.transform = 'translateY(-6px)';
   }, 3000);
 }
 
-play(1);
+play();
+
+function copyCode() {
+  const codeEl = document.getElementById('codeToCopy');
+  const text = codeEl.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('copied');
+    }, 1800);
+  });
+}
 </script>
 
 </body>
