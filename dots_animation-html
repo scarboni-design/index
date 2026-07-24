@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dots Fade — Dev Handoff · VIREO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange:      #FB8500;
+    --orange-dim:  rgba(251,133,0,0.12);
+    --orange-mid:  rgba(251,133,0,0.35);
+    --bg:          #0a0a0a;
+    --surface:     #111111;
+    --surface-2:   #181818;
+    --border:      rgba(255,255,255,0.07);
+    --border-s:    rgba(255,255,255,0.04);
+    --text:        #F1EFE8;
+    --text-muted:  #888780;
+    --text-dim:    rgba(241,239,232,0.35);
+    --green:       #97C459;
+    --mono:        'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+
+  .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .logo-mark { width: 24px; height: 24px; }
+  .logo-name { font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); }
+
+  .separator { width: 1px; height: 18px; background: var(--border); }
+
+  .breadcrumb { font-size: 12px; color: var(--text-muted); }
+  .breadcrumb span { color: var(--text-dim); }
+
+  .badge-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 500;
+    color: var(--green);
+    background: rgba(151,196,89,0.1);
+    border: 0.5px solid rgba(151,196,89,0.25);
+    padding: 4px 10px; border-radius: 99px;
+    letter-spacing: 0.04em;
+  }
+  .badge-status::before {
+    content: '';
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 900px; margin: 0 auto; padding: 56px 40px 80px; }
+
+  /* ── Section header ── */
+  .section-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.03em;
+    color: var(--text); margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px; color: var(--text-muted); margin-bottom: 48px;
+    max-width: 520px; line-height: 1.6;
+  }
+
+  h2 {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  section { margin-bottom: 48px; }
+
+  /* ── Preview cards ── */
+  .preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .preview-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 40px 24px 20px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 24px;
+  }
+
+  .preview-card.dark-surface { background: #161616; }
+  .preview-card.light-surface { background: #f5f4f0; }
+
+  .preview-card-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .preview-card.dark-surface .preview-card-label { color: var(--text-muted); }
+  .preview-card.light-surface .preview-card-label { color: #888; }
+
+  /* ── The animation itself ── */
+  .dots-fade { display: flex; gap: 8px; align-items: center; }
+
+  .df-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    animation: dotFade 1.4s ease-in-out infinite;
+  }
+  .df-dot.orange { background: #FB8500; }
+  .df-dot.white  { background: #FFFFFF; }
+  .df-dot.dark   { background: #1f1f1f; }
+
+  .df-dot:nth-child(2) { animation-delay: .2s; }
+  .df-dot:nth-child(3) { animation-delay: .4s; }
+
+  @keyframes dotFade {
+    0%,100% { opacity: 0.15; }
+    40%     { opacity: 1;    }
+  }
+
+  /* ── Specs table ── */
+  .specs {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .spec-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    border-bottom: 1px solid var(--border-s);
+  }
+  .spec-row:last-child { border-bottom: none; }
+
+  .spec-key {
+    padding: 12px 20px;
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+    border-right: 1px solid var(--border-s);
+    display: flex; align-items: center;
+  }
+
+  .spec-val {
+    padding: 12px 20px;
+    font-size: 12px; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+  }
+
+  .swatch {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
+  }
+
+  /* ── Usage grid ── */
+  .usage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .usage-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+
+  .usage-card-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .usage-card.do .usage-card-title  { color: var(--green); }
+  .usage-card.dont .usage-card-title { color: #F09595; }
+
+  .usage-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .usage-list li {
+    font-size: 12px; color: var(--text-muted); line-height: 1.5;
+    padding-left: 16px; position: relative;
+  }
+  .usage-card.do   .usage-list li::before { content: '↳'; position: absolute; left: 0; color: var(--green); }
+  .usage-card.dont .usage-list li::before { content: '✕'; position: absolute; left: 0; color: #F09595; font-size: 10px; top: 2px; }
+
+  /* ── Code block ── */
+  .code-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-s);
+  }
+
+  .code-lang {
+    font-size: 11px; font-weight: 500; color: var(--text-muted);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  .copy-btn {
+    background: none; border: 0.5px solid var(--border);
+    color: var(--text-muted); font-size: 11px; font-family: 'Inter', sans-serif;
+    padding: 4px 12px; border-radius: 6px; cursor: pointer;
+    transition: border-color .2s, color .2s, background .2s;
+    letter-spacing: 0.04em;
+  }
+  .copy-btn:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); background: rgba(151,196,89,0.1); }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* Syntax colors */
+  .t-sel  { color: #FB8500; }   /* selector / tag */
+  .t-prop { color: #9EC8F0; }   /* property */
+  .t-val  { color: #C8E6A0; }   /* value */
+  .t-cmt  { color: #555550; font-style: italic; }  /* comment */
+  .t-key  { color: #CF9EFF; }   /* @keyframes */
+  .t-pct  { color: #FB8500; opacity:.7; }  /* percentage */
+
+  /* ── Behavior note ── */
+  .note {
+    background: var(--orange-dim);
+    border: 0.5px solid var(--orange-mid);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px; color: var(--text-muted); line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .note-icon { color: var(--orange); flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Context examples ── */
+  .ctx-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  }
+
+  .ctx-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .ctx-mockup {
+    background: #161616;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; min-height: 80px;
+  }
+
+  .ctx-label-title { font-size: 11px; font-weight: 600; color: var(--text); }
+  .ctx-label-desc  { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+  .ctx-text { font-size: 11px; color: var(--text-muted); }
+  .ctx-text-sm { font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; }
+
+  /* modal mockup */
+  .mock-modal {
+    width: 100%; background: #1f1f1f;
+    border-radius: 6px; padding: 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .mock-modal-title { font-size: 10px; font-weight: 600; color: var(--text); }
+  .mock-btn {
+    width: 100%; background: rgba(251,133,0,0.15); border: 0.5px solid rgba(251,133,0,0.3);
+    border-radius: 4px; padding: 5px; text-align: center;
+    font-size: 9px; color: var(--orange);
+  }
+
+  /* splash mockup */
+  .mock-splash {
+    width: 100%; background: #0f0f0f;
+    border-radius: 6px; padding: 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .mock-logo { font-size: 11px; font-weight: 700; color: var(--orange); letter-spacing: 0.1em; }
+
+  /* inline mockup */
+  .mock-inline {
+    width: 100%; background: #1a1a1a;
+    border-radius: 6px; padding: 8px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .mock-inline-label { font-size: 9px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<nav class="topbar">
+  <div class="topbar-left">
+    <span class="breadcrumb"><span>Components /</span> Loading · Dots Fade</span>
+  </div>
+  <div class="badge-status">Ready for dev</div>
+</nav>
+
+<!-- Page -->
+<main class="page">
+
+  <div class="section-tag">Loading indicator</div>
+  <h1>Dots Fade</h1>
+  <p class="subtitle">Three dots animating via opacity only — no movement, no bounce. Chosen for its restraint and clinical neutrality. Works on dark and light surfaces.</p>
+
+  <!-- Preview -->
+  <section>
+    <h2>Preview</h2>
+    <div class="preview-grid">
+      <div class="preview-card dark-surface">
+        <div class="dots-fade">
+          <div class="df-dot orange"></div>
+          <div class="df-dot orange"></div>
+          <div class="df-dot orange"></div>
+        </div>
+        <span class="preview-card-label" style="color:#555">Dark · Orange #FB8500</span>
+      </div>
+      <div class="preview-card dark-surface">
+        <div class="dots-fade">
+          <div class="df-dot white"></div>
+          <div class="df-dot white"></div>
+          <div class="df-dot white"></div>
+        </div>
+        <span class="preview-card-label" style="color:#555">Dark · White #FFFFFF</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Specs -->
+  <section>
+    <h2>Specs</h2>
+    <div class="specs">
+      <div class="spec-row">
+        <span class="spec-key">Dot size</span>
+        <span class="spec-val">6 × 6 px</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Gap between dots</span>
+        <span class="spec-val">8 px</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Dot shape</span>
+        <span class="spec-val">border-radius: 50%</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Color · variant A</span>
+        <span class="spec-val"><div class="swatch" style="background:#FB8500"></div>#FB8500</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Color · variant B</span>
+        <span class="spec-val"><div class="swatch" style="background:#fff;"></div>#FFFFFF</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Opacity range</span>
+        <span class="spec-val">0.15 → 1 → 0.15</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Duration</span>
+        <span class="spec-val">1.4s per cycle</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Easing</span>
+        <span class="spec-val">ease-in-out</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Stagger delay</span>
+        <span class="spec-val">dot 1: 0s · dot 2: 0.2s · dot 3: 0.4s</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Loop</span>
+        <span class="spec-val">infinite</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-key">Animation property</span>
+        <span class="spec-val">opacity only — no transform</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Note -->
+  <section>
+    <div class="note">
+      <span class="note-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" stroke="#FB8500"/><path d="M7 6v4M7 4.5v.5" stroke="#FB8500" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </span>
+      <span>Respect <code style="font-family:var(--mono);font-size:11px;color:var(--orange)">prefers-reduced-motion</code>. When the user has reduced motion enabled, remove the animation and display dots at full opacity (static state). No fallback spinner needed.</span>
+    </div>
+  </section>
+
+  <!-- Code -->
+  <section>
+    <h2>Code</h2>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">HTML + CSS</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy</button>
+      </div>
+      <pre id="codeBlock"><span class="t-cmt">&lt;!-- Dots Fade · Loading Indicator --&gt;
+&lt;!-- Variant: orange (#FB8500) or white (#FFFFFF) via --dot-color --&gt;</span>
+
+<span class="t-sel">&lt;div</span> <span class="t-prop">class</span>=<span class="t-val">"dots-fade"</span><span class="t-sel">&gt;</span>
+  <span class="t-sel">&lt;span</span> <span class="t-prop">class</span>=<span class="t-val">"dot"</span><span class="t-sel">&gt;&lt;/span&gt;</span>
+  <span class="t-sel">&lt;span</span> <span class="t-prop">class</span>=<span class="t-val">"dot"</span><span class="t-sel">&gt;&lt;/span&gt;</span>
+  <span class="t-sel">&lt;span</span> <span class="t-prop">class</span>=<span class="t-val">"dot"</span><span class="t-sel">&gt;&lt;/span&gt;</span>
+<span class="t-sel">&lt;/div&gt;</span>
+
+<span class="t-cmt">/* ── CSS ── */</span>
+
+<span class="t-sel">.dots-fade</span> {
+  <span class="t-prop">display</span>: <span class="t-val">flex</span>;
+  <span class="t-prop">gap</span>: <span class="t-val">8px</span>;
+  <span class="t-prop">align-items</span>: <span class="t-val">center</span>;
+}
+
+<span class="t-sel">.dots-fade .dot</span> {
+  <span class="t-prop">width</span>: <span class="t-val">6px</span>;
+  <span class="t-prop">height</span>: <span class="t-val">6px</span>;
+  <span class="t-prop">border-radius</span>: <span class="t-val">50%</span>;
+  <span class="t-prop">background</span>: <span class="t-val">var(--dot-color, #FB8500)</span>; <span class="t-cmt">/* override with #FFFFFF for white variant */</span>
+  <span class="t-prop">animation</span>: <span class="t-val">dotFade 1.4s ease-in-out infinite</span>;
+}
+
+<span class="t-sel">.dots-fade .dot:nth-child(2)</span> { <span class="t-prop">animation-delay</span>: <span class="t-val">.2s</span>; }
+<span class="t-sel">.dots-fade .dot:nth-child(3)</span> { <span class="t-prop">animation-delay</span>: <span class="t-val">.4s</span>; }
+
+<span class="t-key">@keyframes</span> <span class="t-sel">dotFade</span> {
+  <span class="t-pct">0%</span>, <span class="t-pct">100%</span> { <span class="t-prop">opacity</span>: <span class="t-val">0.15</span>; }
+  <span class="t-pct">40%</span>       { <span class="t-prop">opacity</span>: <span class="t-val">1</span>; }
+}
+
+<span class="t-cmt">/* ── Reduced motion ── */</span>
+
+<span class="t-key">@media</span> (<span class="t-prop">prefers-reduced-motion</span>: <span class="t-val">reduce</span>) {
+  <span class="t-sel">.dots-fade .dot</span> {
+    <span class="t-prop">animation</span>: <span class="t-val">none</span>;
+    <span class="t-prop">opacity</span>: <span class="t-val">1</span>;
+  }
+}</pre>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const rawCode = `.dots-fade {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dots-fade .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dot-color, #FB8500); /* override with #FFFFFF for white variant */
+  animation: dotFade 1.4s ease-in-out infinite;
+}
+
+.dots-fade .dot:nth-child(2) { animation-delay: .2s; }
+.dots-fade .dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes dotFade {
+  0%, 100% { opacity: 0.15; }
+  40%      { opacity: 1;    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .dots-fade .dot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+<!-- HTML -->
+<div class="dots-fade">
+  <span class="dot"></span>
+  <span class="dot"></span>
+  <span class="dot"></span>
+</div>`;
+
+function copyCode() {
+  navigator.clipboard.writeText(rawCode).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
