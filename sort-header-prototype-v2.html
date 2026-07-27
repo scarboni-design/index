@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Exam list — Column sort states</title>
+<style>
+  :root {
+    --bg-page: #0f0f0f;
+    --bg-surface: #161616;
+    --bg-row: #1f1f1f;
+    --bg-row-alt: #1a1a1a;
+    --text-main: #F1EFE8;
+    --text-muted: #888780;
+    --text-dim: #6B6A64;
+    --accent: #FB8500;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg-page);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 32px;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .subtitle { color: var(--text-muted); font-size: 13px; margin: 0 0 32px; }
+  .option-block { margin-bottom: 48px; }
+  .option-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+  .option-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .table-wrap { background: var(--bg-surface); border-radius: 10px; border: 1px solid #2a2a2a; overflow: hidden; }
+  .toolbar { display: flex; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #2a2a2a; align-items: center; }
+  .search { flex: 1; background: var(--bg-row); border: 1px solid #333; border-radius: 6px; padding: 8px 12px; color: var(--text-muted); font-size: 13px; }
+  .count-label { font-size: 12px; color: var(--text-muted); padding: 8px 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  thead th {
+    text-align: left; padding: 10px 12px; font-weight: 600; color: var(--text-main);
+    letter-spacing: 0.3px; cursor: pointer; user-select: none; white-space: nowrap;
+    border-bottom: 1px solid #2a2a2a; transition: color 0.15s, background 0.15s;
+  }
+  thead th:hover { color: var(--text-main); }
+  th .th-inner { display: inline-flex; align-items: center; gap: 5px; }
+
+  /* arrows built from CSS triangles, no external font */
+  .sort-icons { display: inline-flex; flex-direction: column; gap: 2px; margin-left: 2px; }
+  .arrow { width: 0; height: 0; border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; }
+  .arrow.up { border-bottom: 4.5px solid var(--text-dim); }
+  .arrow.down { border-top: 4.5px solid var(--text-dim); }
+  .arrow.on.up { border-bottom-color: var(--accent); }
+  .arrow.on.down { border-top-color: var(--accent); }
+
+  /* text color only applied where the variant explicitly wants it */
+  th.text-orange { color: var(--accent); }
+  th.pill-active .th-inner { background: rgba(251,133,0,0.14); padding: 4px 8px; border-radius: 4px; margin: -4px -8px; }
+
+  /* variant D: underline accent, text stays muted */
+  th.underline-active { box-shadow: inset 0 -2px 0 var(--accent); }
+
+  /* variant E: single merged chevron that flips direction */
+  .chevron-single { width: 9px; height: 9px; margin-left: 3px; position: relative; display: inline-block; }
+  .chevron-single svg { width: 100%; height: 100%; display: block; transition: transform 0.15s; }
+  .chevron-single.desc svg { transform: rotate(180deg); }
+  .chevron-single path { stroke: var(--text-dim); }
+  th.text-orange .chevron-single path { stroke: var(--accent); }
+  .chevron-single.hidden { visibility: hidden; }
+
+  tbody tr { border-bottom: 1px solid #232323; }
+  tbody tr:nth-child(even) { background: var(--bg-row-alt); }
+  tbody td { padding: 12px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  td.muted { color: var(--text-muted); }
+  .status { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 12px; }
+  .hint { font-size: 12px; color: var(--text-dim); margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Exam list — variações de estado de ordenação de coluna</h1>
+<p class="subtitle">Clique em qualquer header para simular o comportamento. Ciclo: padrão → ascendente → descendente → padrão.</p>
+
+<!-- shared row generator template as HTML string, repeated per table -->
+
+<!-- OPTION A -->
+<div class="option-block">
+  <div class="option-label">Opção A</div>
+  <div class="option-desc">Somente as setas mudam de cor. Discreto, próximo do padrão web.</div>
+  <div class="table-wrap" data-variant="A">
+    <div class="toolbar"><div class="search">🔍 &nbsp;Search exams...</div></div>
+    <div class="count-label">Showing 4 of 100 exams</div>
+    <table>
+      <thead><tr class="header-row">
+        <th data-col="id"><span class="th-inner">ID <span class="sort-icons"><span class="arrow up on"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="name"><span class="th-inner">NAME <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="dob"><span class="th-inner">DATE OF BIRTH <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="gender"><span class="th-inner">GENDER <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="type"><span class="th-inner">EXAM TYPE <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="acq"><span class="th-inner">ACQUISITION DATE <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="conf"><span class="th-inner">CONFIRMATION <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="status"><span class="th-inner">STATUS <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>387299</td><td>John Doe Oliver</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>487283</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Female</td><td>rhythm ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>123456</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="hint">Estado inicial: ID ativa (ascendente).</div>
+</div>
+
+<!-- OPTION B -->
+<div class="option-block">
+  <div class="option-label">Opção B</div>
+  <div class="option-desc">Setas + texto do header em laranja. Mais visível à distância.</div>
+  <div class="table-wrap" data-variant="B">
+    <div class="toolbar"><div class="search">🔍 &nbsp;Search exams...</div></div>
+    <div class="count-label">Showing 4 of 100 exams</div>
+    <table>
+      <thead><tr class="header-row">
+        <th data-col="id"><span class="th-inner">ID <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="name"><span class="th-inner">NAME <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="dob"><span class="th-inner">DATE OF BIRTH <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="gender"><span class="th-inner">GENDER <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="type"><span class="th-inner">EXAM TYPE <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="acq" class="text-orange"><span class="th-inner">ACQUISITION DATE <span class="sort-icons"><span class="arrow up on"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="conf"><span class="th-inner">CONFIRMATION <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="status"><span class="th-inner">STATUS <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>387299</td><td>John Doe Oliver</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>487283</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Female</td><td>rhythm ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>123456</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="hint">Estado inicial: Acquisition date ativa (ascendente).</div>
+</div>
+
+<!-- OPTION C -->
+<div class="option-block">
+  <div class="option-label">Opção C</div>
+  <div class="option-desc">Pill de fundo sutil atrás do header ativo.</div>
+  <div class="table-wrap" data-variant="C">
+    <div class="toolbar"><div class="search">🔍 &nbsp;Search exams...</div></div>
+    <div class="count-label">Showing 4 of 100 exams</div>
+    <table>
+      <thead><tr class="header-row">
+        <th data-col="id"><span class="th-inner">ID <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="name" class="pill-active"><span class="th-inner">NAME <span class="sort-icons"><span class="arrow up"></span><span class="arrow down on"></span></span></span></th>
+        <th data-col="dob"><span class="th-inner">DATE OF BIRTH <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="gender"><span class="th-inner">GENDER <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="type"><span class="th-inner">EXAM TYPE <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="acq"><span class="th-inner">ACQUISITION DATE <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="conf"><span class="th-inner">CONFIRMATION <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="status"><span class="th-inner">STATUS <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>387299</td><td>John Doe Oliver</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>487283</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Female</td><td>rhythm ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>123456</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="hint">Estado inicial: Name ativa (descendente).</div>
+</div>
+
+<!-- OPTION D: underline accent -->
+<div class="option-block">
+  <div class="option-label">Opção D</div>
+  <div class="option-desc">Sublinhado laranja de 2px sob o header ativo, no lugar da borda-fantasma da tabela. Fica como uma "aba" ativa, familiar de tabs.</div>
+  <div class="table-wrap" data-variant="D">
+    <div class="toolbar"><div class="search">🔍 &nbsp;Search exams...</div></div>
+    <div class="count-label">Showing 4 of 100 exams</div>
+    <table>
+      <thead><tr class="header-row">
+        <th data-col="id"><span class="th-inner">ID <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="name"><span class="th-inner">NAME <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="dob" class="underline-active"><span class="th-inner">DATE OF BIRTH <span class="sort-icons"><span class="arrow up on"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="gender"><span class="th-inner">GENDER <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="type"><span class="th-inner">EXAM TYPE <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="acq"><span class="th-inner">ACQUISITION DATE <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="conf"><span class="th-inner">CONFIRMATION <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+        <th data-col="status"><span class="th-inner">STATUS <span class="sort-icons"><span class="arrow up"></span><span class="arrow down"></span></span></span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>387299</td><td>John Doe Oliver</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>487283</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Female</td><td>rhythm ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>123456</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="hint">Estado inicial: Date of birth ativa (ascendente).</div>
+</div>
+
+<!-- OPTION E: single chevron that flips -->
+<div class="option-block">
+  <div class="option-label">Opção E</div>
+  <div class="option-desc">Um único chevron por coluna (não duas setas fixas): fica oculto no estado padrão e aparece só na coluna ativa, virando 180° entre asc/desc. Visual mais limpo, mas exige o usuário "descobrir" onde clicar.</div>
+  <div class="table-wrap" data-variant="E">
+    <div class="toolbar"><div class="search">🔍 &nbsp;Search exams...</div></div>
+    <div class="count-label">Showing 4 of 100 exams</div>
+    <table>
+      <thead><tr class="header-row">
+        <th data-col="id"><span class="th-inner">ID <span class="chevron-single hidden asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+        <th data-col="name"><span class="th-inner">NAME <span class="chevron-single hidden asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+        <th data-col="dob"><span class="th-inner">DATE OF BIRTH <span class="chevron-single hidden asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+        <th data-col="gender"><span class="th-inner">GENDER <span class="chevron-single hidden asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+        <th data-col="type"><span class="th-inner">EXAM TYPE <span class="chevron-single hidden asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+        <th data-col="acq" class="text-orange"><span class="th-inner">ACQUISITION DATE <span class="chevron-single asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+        <th data-col="conf"><span class="th-inner">CONFIRMATION <span class="chevron-single hidden asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+        <th data-col="status"><span class="th-inner">STATUS <span class="chevron-single hidden asc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td>387299</td><td>John Doe Oliver</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>487283</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Female</td><td>rhythm ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+        <tr><td>123456</td><td>Unknown patient</td><td class="muted">dd/mm/yy</td><td>Male</td><td>resting ecg</td><td class="muted">dd/mm/yy</td><td>confirmed</td><td><span class="status">not synced</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="hint">Estado inicial: Acquisition date ativa (ascendente, seta apontando para cima).</div>
+</div>
+
+<script>
+  document.querySelectorAll('.table-wrap').forEach(function(wrap) {
+    var variant = wrap.dataset.variant;
+    var headers = wrap.querySelectorAll('thead th');
+
+    headers.forEach(function(th) {
+      th.addEventListener('click', function() {
+
+        if (variant === 'E') {
+          var chevron = th.querySelector('.chevron-single');
+          var wasActive = th.classList.contains('text-orange');
+          var wasAsc = chevron.classList.contains('asc') && !chevron.classList.contains('desc');
+
+          headers.forEach(function(h) {
+            h.classList.remove('text-orange');
+            var c = h.querySelector('.chevron-single');
+            c.classList.add('hidden');
+            c.classList.remove('desc');
+            c.classList.add('asc');
+          });
+
+          if (wasActive && wasAsc) {
+            th.classList.add('text-orange');
+            chevron.classList.remove('hidden');
+            chevron.classList.add('desc');
+            chevron.classList.remove('asc');
+          } else if (!wasActive) {
+            th.classList.add('text-orange');
+            chevron.classList.remove('hidden');
+          }
+          return;
+        }
+
+        // A, B, C, D share the two-arrow logic, each applies its own highlight class
+        var upArrow = th.querySelector('.up');
+        var downArrow = th.querySelector('.down');
+        var wasAscActive = upArrow.classList.contains('on');
+        var wasDescActive = downArrow.classList.contains('on');
+
+        headers.forEach(function(h) {
+          h.classList.remove('text-orange', 'pill-active', 'underline-active');
+          h.querySelector('.up').classList.remove('on');
+          h.querySelector('.down').classList.remove('on');
+        });
+
+        function applyHighlight(el) {
+          if (variant === 'B') el.classList.add('text-orange');
+          if (variant === 'C') el.classList.add('pill-active');
+          if (variant === 'D') el.classList.add('underline-active');
+          // variant A: arrow color only, no extra class needed
+        }
+
+        if (wasAscActive) {
+          applyHighlight(th);
+          downArrow.classList.add('on');
+        } else if (wasDescActive) {
+          // cycles back to default, nothing active
+        } else {
+          applyHighlight(th);
+          upArrow.classList.add('on');
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
