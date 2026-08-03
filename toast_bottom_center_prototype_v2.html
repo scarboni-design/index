@@ -13,25 +13,92 @@
     color: #F1EFE8;
   }
 
+  .demo-frame {
+    --bg-topbar: #161616;
+    --bg-screen: #131315;
+    --text-primary: #F1EFE8;
+    --text-secondary: #888780;
+    --border: #2c2c2a;
+    --lead-line: #1f1f1f;
+    --grid-line: #1a1a1a;
+    --btn-bg: #1f1f1f;
+    --btn-border: #2c2c2a;
+    --btn-active-bg: #FB8500;
+    --btn-active-text: #161616;
+    --toast-bg: #2c2c2e;
+    --toast-border: #444447;
+    --toast-shadow: rgba(0,0,0,0.5);
+    --close-color: #5F5E5A;
+    --icon-success: #97C459;
+    --icon-info: #888780;
+    --icon-warning: #FB8500;
+    --icon-error: #F09595;
+  }
+
+  .demo-frame[data-theme="light"] {
+    --bg-topbar: #FFFFFF;
+    --bg-screen: #FFFFFF;
+    --text-primary: #2C2C2A;
+    --text-secondary: #6B6A64;
+    --border: #E2E0D6;
+    --lead-line: #EDEBE2;
+    --grid-line: #F0EFEA;
+    --btn-bg: #FFF3E5;
+    --btn-border: #F5DDBF;
+    --btn-active-bg: #FB8500;
+    --btn-active-text: #FFFFFF;
+    --toast-bg: #EDF2F7;
+    --toast-border: #E2E8F0;
+    --toast-shadow: rgba(0,0,0,0.12);
+    --close-color: #A9A79C;
+    --icon-success: #3B6D11;
+    --icon-info: #6B6A64;
+    --icon-warning: #C46200;
+    --icon-error: #993C1D;
+  }
+
+  .theme-switch {
+    display: inline-flex;
+    background: #1f1f1f;
+    border: 0.5px solid #2c2c2a;
+    border-radius: 7px;
+    padding: 3px;
+    gap: 2px;
+    margin: 16px 20px 0;
+  }
+  .theme-switch button {
+    background: transparent;
+    border: none;
+    color: #888780;
+    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .theme-switch button.active { background: #FB8500; color: #161616; font-weight: 500; }
+
   .topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 14px 20px;
-    background: #161616;
-    border-bottom: 0.5px solid #2c2c2a;
+    background: var(--bg-topbar);
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text-primary);
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
   }
 
-  .patient-name { font-size: 15px; font-weight: 500; margin: 0; }
-  .patient-id { font-size: 12px; color: #888780; margin: 0; }
-  .topbar-right { display: flex; align-items: center; gap: 20px; font-size: 13px; color: #888780; }
+  .patient-name { font-size: 15px; font-weight: 500; margin: 0; color: var(--text-primary); }
+  .patient-id { font-size: 12px; color: var(--text-secondary); margin: 0; }
+  .topbar-right { display: flex; align-items: center; gap: 20px; font-size: 13px; color: var(--text-secondary); }
   .heart { color: #FB8500; }
 
   .screen {
     position: relative;
     height: 620px;
-    background: #131315;
+    background: var(--bg-screen);
     overflow: hidden;
+    transition: background .25s ease;
   }
 
   .ecg-grid {
@@ -46,15 +113,15 @@
     align-items: center;
     gap: 10px;
     height: 78px;
-    border-bottom: 0.5px solid #1f1f1f;
+    border-bottom: 0.5px solid var(--lead-line);
   }
 
-  .lead-label { width: 28px; font-size: 12px; color: #888780; }
+  .lead-label { width: 28px; font-size: 12px; color: var(--text-secondary); }
 
   .lead-wave {
     flex: 1;
     height: 40px;
-    background: repeating-linear-gradient(90deg, transparent, transparent 20px, #1a1a1a 20px, #1a1a1a 21px);
+    background: repeating-linear-gradient(90deg, transparent, transparent 20px, var(--grid-line) 20px, var(--grid-line) 21px);
   }
 
   .controls {
@@ -64,19 +131,19 @@
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
-    color: #5F5E5A;
+    color: var(--text-secondary);
   }
 
   .btn-group { display: flex; gap: 8px; }
   .btn-group button {
-    background: #1f1f1f;
-    color: #F1EFE8;
-    border: 0.5px solid #2c2c2a;
+    background: var(--btn-bg);
+    color: var(--text-primary);
+    border: 0.5px solid var(--btn-border);
     border-radius: 6px;
     padding: 8px 18px;
     font-size: 13px;
   }
-  .btn-group button.active { background: #FB8500; color: #161616; border-color: #FB8500; }
+  .btn-group button.active { background: var(--btn-active-bg); color: var(--btn-active-text); border-color: var(--btn-active-bg); }
 
   .demo-controls {
     display: flex;
@@ -118,8 +185,8 @@
     gap: 10px;
     width: auto;
     max-width: 100%;
-    background: #2c2c2e;
-    border: 0.5px solid #444447;
+    background: var(--toast-bg);
+    border: 0.5px solid var(--toast-border);
     border-left: none;
     border-radius: 8px;
     padding: 10px 14px;
@@ -127,21 +194,21 @@
     overflow: hidden;
     opacity: 0;
     transition: opacity .6s ease;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 16px var(--toast-shadow);
   }
   .toast.show { opacity: 1; }
   .toast.leaving { opacity: 0; }
 
   .toast .icon { display: flex; flex-shrink: 0; }
   .toast .body { flex: 1; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; overflow: hidden; }
-  .toast .message { margin: 0; font-size: 13px; color: #F1EFE8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .toast .close { display: flex; color: #5F5E5A; cursor: pointer; flex-shrink: 0; }
-  .toast .link { color: #F1EFE8; text-decoration: underline; font-size: 12px; }
+  .toast .message { margin: 0; font-size: 13px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .toast .close { display: flex; color: var(--close-color); cursor: pointer; flex-shrink: 0; }
+  .toast .link { color: var(--text-primary); text-decoration: underline; font-size: 12px; }
 
-  .toast.info .icon { color: #888780; }
-  .toast.success .icon { color: #97C459; }
-  .toast.error .icon { color: #F09595; }
-  .toast.warning .icon { color: #FB8500; }
+  .toast.info .icon { color: var(--icon-info); }
+  .toast.success .icon { color: var(--icon-success); }
+  .toast.error .icon { color: var(--icon-error); }
+  .toast.warning .icon { color: var(--icon-warning); }
 
 
 
@@ -215,29 +282,38 @@
 </head>
 <body>
 
-  <div class="topbar">
-    <div>
-      <p class="patient-name">Unknown patient</p>
-      <p class="patient-id">Patient ID</p>
+  <div class="demo-frame" id="demoFrame" data-theme="dark">
+
+    <div class="theme-switch">
+      <button class="active" onclick="setTheme('dark', this)">Dark</button>
+      <button onclick="setTheme('light', this)">Light</button>
     </div>
-    <div class="topbar-right">
-      <span class="heart">&#9825; 85</span>
-      <span>1 exam waiting to be synced</span>
-    </div>
-  </div>
 
-  <div class="screen">
-    <div class="ecg-grid" id="ecgGrid"></div>
-
-    <div class="toast-stack" id="toastStack"></div>
-
-    <div class="controls">
-      <span>25.0 mm/s, 10.0 mm/mV, 25 Hz</span>
-      <div class="btn-group">
-        <button>Rhythm</button>
-        <button class="active">Auto</button>
+    <div class="topbar">
+      <div>
+        <p class="patient-name">Unknown patient</p>
+        <p class="patient-id">Patient ID</p>
+      </div>
+      <div class="topbar-right">
+        <span class="heart">&#9825; 85</span>
+        <span>1 exam waiting to be synced</span>
       </div>
     </div>
+
+    <div class="screen">
+      <div class="ecg-grid" id="ecgGrid"></div>
+
+      <div class="toast-stack" id="toastStack"></div>
+
+      <div class="controls">
+        <span>25.0 mm/s, 10.0 mm/mV, 25 Hz</span>
+        <div class="btn-group">
+          <button>Rhythm</button>
+          <button class="active">Auto</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="demo-controls">
@@ -353,22 +429,22 @@
         <rect x="460" y="0" width="440" height="620" fill="#FFFFFF"/>
         <text x="484" y="34" font-size="12" fill="#8C8A80" letter-spacing="0.5">LIGHT MODE</text>
 
-        <rect x="484" y="56" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <rect x="484" y="56" width="392" height="46" rx="8" fill="#EDF2F7" stroke="#E2E8F0" stroke-width="0.5"/>
         <svg x="499" y="70" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
         <text x="526" y="83" font-size="13" fill="#2C2C2A">3 exams synced.</text>
         <text x="484" y="116" font-size="11" fill="#6B6A64">Success — confirms an action already completed.</text>
 
-        <rect x="484" y="140" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <rect x="484" y="140" width="392" height="46" rx="8" fill="#EDF2F7" stroke="#E2E8F0" stroke-width="0.5"/>
         <svg x="499" y="154" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6A64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="8.01"></line><line x1="12" y1="11" x2="12" y2="16"></line></svg>
         <text x="526" y="167" font-size="13" fill="#2C2C2A">All wires are properly connected.</text>
         <text x="484" y="200" font-size="11" fill="#6B6A64">Info — passive status update, nothing to act on.</text>
 
-        <rect x="484" y="224" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <rect x="484" y="224" width="392" height="46" rx="8" fill="#EDF2F7" stroke="#E2E8F0" stroke-width="0.5"/>
         <svg x="499" y="238" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C46200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16" x2="12" y2="16.01"></line></svg>
         <text x="526" y="251" font-size="13" fill="#2C2C2A">STAT exam pending review.</text>
         <text x="484" y="284" font-size="11" fill="#6B6A64">Warning — needs attention soon, but not urgent enough to block.</text>
 
-        <rect x="484" y="308" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <rect x="484" y="308" width="392" height="46" rx="8" fill="#EDF2F7" stroke="#E2E8F0" stroke-width="0.5"/>
         <svg x="499" y="322" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#993C1D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
         <text x="526" y="335" font-size="13" fill="#2C2C2A">Sync failed. Check the USB connection.</text>
         <text x="484" y="368" font-size="11" fill="#6B6A64">Error — recoverable failure, user can retry from the same screen.</text>
@@ -420,6 +496,12 @@ leads.forEach(l => {
   div.innerHTML = '<span class="lead-label">' + l + '</span><div class="lead-wave"></div>';
   grid.appendChild(div);
 });
+
+function setTheme(theme, btn) {
+  document.getElementById('demoFrame').setAttribute('data-theme', theme);
+  btn.parentNode.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
 
 const svgProps = 'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 const icons = {
@@ -500,13 +582,13 @@ document.getElementById('codeCss').textContent =
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #2c2c2e;
-  border: 0.5px solid #444447;
+  background: #2c2c2e;      /* light mode: #EDF2F7 (Gray 100) */
+  border: 0.5px solid #444447;  /* light mode: #E2E8F0 (Gray 200) */
   border-radius: 8px;
   padding: 10px 14px;
   opacity: 0;
   transition: opacity 0.6s ease;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);  /* light mode: rgba(0,0,0,0.12) */
 }
 .toast.show { opacity: 1; }
 
@@ -515,15 +597,21 @@ document.getElementById('codeCss').textContent =
   flex: 1;
   overflow: hidden;
 }
-.toast .message { margin: 0; font-size: 13px; color: #F1EFE8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.toast .close { display: flex; color: #5F5E5A; cursor: pointer; flex-shrink: 0; }
-.toast .link { color: #F1EFE8; text-decoration: underline; font-size: 12px; }
+.toast .message { margin: 0; font-size: 13px; color: #F1EFE8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }  /* light mode: #2C2C2A */
+.toast .close { display: flex; color: #5F5E5A; cursor: pointer; flex-shrink: 0; }  /* light mode: #A9A79C */
+.toast .link { color: #F1EFE8; text-decoration: underline; font-size: 12px; }  /* light mode: #2C2C2A */
 
-/* Icon color = only severity signal */
+/* Icon color = only severity signal (dark mode values, see light mode below) */
 .toast.info .icon    { color: #888780; }
 .toast.success .icon { color: #97C459; }
 .toast.error .icon   { color: #F09595; }
-.toast.warning .icon { color: #FB8500; }`;
+.toast.warning .icon { color: #FB8500; }
+
+/* Light mode overrides */
+[data-theme="light"] .toast.info .icon    { color: #6B6A64; }
+[data-theme="light"] .toast.success .icon { color: #3B6D11; }
+[data-theme="light"] .toast.error .icon   { color: #993C1D; }
+[data-theme="light"] .toast.warning .icon { color: #C46200; }`;
 
 document.getElementById('codeJs').textContent =
 `let activeToast = null;
