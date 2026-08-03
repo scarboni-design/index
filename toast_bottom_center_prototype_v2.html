@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Anchor - Toast bottom-center prototype</title>
+
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #0f0f0f;
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    color: #F1EFE8;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: #161616;
+    border-bottom: 0.5px solid #2c2c2a;
+  }
+
+  .patient-name { font-size: 15px; font-weight: 500; margin: 0; }
+  .patient-id { font-size: 12px; color: #888780; margin: 0; }
+  .topbar-right { display: flex; align-items: center; gap: 20px; font-size: 13px; color: #888780; }
+  .heart { color: #FB8500; }
+
+  .screen {
+    position: relative;
+    height: 620px;
+    background: #131315;
+    overflow: hidden;
+  }
+
+  .ecg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 20px 60px 20px 20px;
+  }
+
+  .lead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 78px;
+    border-bottom: 0.5px solid #1f1f1f;
+  }
+
+  .lead-label { width: 28px; font-size: 12px; color: #888780; }
+
+  .lead-wave {
+    flex: 1;
+    height: 40px;
+    background: repeating-linear-gradient(90deg, transparent, transparent 20px, #1a1a1a 20px, #1a1a1a 21px);
+  }
+
+  .controls {
+    position: absolute;
+    bottom: 20px; left: 20px; right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #5F5E5A;
+  }
+
+  .btn-group { display: flex; gap: 8px; }
+  .btn-group button {
+    background: #1f1f1f;
+    color: #F1EFE8;
+    border: 0.5px solid #2c2c2a;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 13px;
+  }
+  .btn-group button.active { background: #FB8500; color: #161616; border-color: #FB8500; }
+
+  .demo-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 20px;
+    background: #161616;
+    border-top: 0.5px solid #2c2c2a;
+  }
+
+  .demo-controls button {
+    background: transparent;
+    border: 0.5px solid #444441;
+    color: #F1EFE8;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .demo-controls button:hover { background: #1f1f1f; }
+  .demo-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-group-label { margin: 0; font-size: 11px; color: #5F5E5A; text-transform: uppercase; letter-spacing: 0.03em; width: 100%; margin-bottom: 2px; }
+
+  .toast-stack {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    max-width: 100%;
+    background: #2c2c2e;
+    border: 0.5px solid #444447;
+    border-left: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity .6s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  .toast.show { opacity: 1; }
+  .toast.leaving { opacity: 0; }
+
+  .toast .icon { display: flex; flex-shrink: 0; }
+  .toast .body { flex: 1; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; overflow: hidden; }
+  .toast .message { margin: 0; font-size: 13px; color: #F1EFE8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .toast .close { display: flex; color: #5F5E5A; cursor: pointer; flex-shrink: 0; }
+  .toast .link { color: #F1EFE8; text-decoration: underline; font-size: 12px; }
+
+  .toast.info .icon { color: #888780; }
+  .toast.success .icon { color: #97C459; }
+  .toast.error .icon { color: #F09595; }
+  .toast.warning .icon { color: #FB8500; }
+
+
+
+  .guidelines {
+    padding: 24px 20px 40px;
+    background: #0f0f0f;
+    border-top: 0.5px solid #2c2c2a;
+  }
+  .guidelines h2 { font-size: 15px; font-weight: 500; margin: 0 0 16px; color: #F1EFE8; }
+  .rule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .rule-card {
+    background: #161616;
+    border: 0.5px solid #2c2c2a;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .rule-card p.case { margin: 0 0 6px; font-size: 13px; font-weight: 500; color: #F1EFE8; }
+  .rule-card p.detail { margin: 0; font-size: 12px; color: #888780; line-height: 1.5; }
+  .rule-card .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .tag.do { background: #1a2b16; color: #97C459; }
+  .tag.dont { background: #2b1a1a; color: #F09595; }
+  .dont-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .dont-list li { font-size: 12px; color: #888780; display: flex; gap: 8px; }
+  .dont-list li span.mark { color: #F09595; flex-shrink: 0; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .compare-card { background: #161616; border: 0.5px solid #2c2c2a; border-radius: 8px; padding: 16px; }
+  .compare-title { margin: 0 0 10px; font-size: 13px; font-weight: 500; color: #F1EFE8; }
+  .compare-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .compare-list li { font-size: 12px; color: #888780; line-height: 1.5; }
+
+  .code-block { background: #161616; border: 0.5px solid #2c2c2a; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .icon-download {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #161616;
+    border: 0.5px solid #2c2c2a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .code-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; border-bottom: 0.5px solid #2c2c2a; background: #1a1a1a; }
+  .code-label { margin: 0; font-size: 12px; color: #888780; }
+  .copy-btn {
+    background: transparent;
+    border: 0.5px solid #3a3a37;
+    color: #F1EFE8;
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: #232320; }
+  .copy-btn.copied { border-color: #97C459; color: #97C459; }
+  .code-block pre {
+    margin: 0;
+    padding: 14px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    color: #d4d4d0;
+    overflow-x: auto;
+    white-space: pre;
+  }</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div>
+      <p class="patient-name">Unknown patient</p>
+      <p class="patient-id">Patient ID</p>
+    </div>
+    <div class="topbar-right">
+      <span class="heart">&#9825; 85</span>
+      <span>1 exam waiting to be synced</span>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="ecg-grid" id="ecgGrid"></div>
+
+    <div class="toast-stack" id="toastStack"></div>
+
+    <div class="controls">
+      <span>25.0 mm/s, 10.0 mm/mV, 25 Hz</span>
+      <div class="btn-group">
+        <button>Rhythm</button>
+        <button class="active">Auto</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-controls">
+    <div class="demo-group">
+      <p class="demo-group-label">Exam list (sync)</p>
+      <button onclick="showToast('success', '3 exams synced.')">Sync complete</button>
+      <button onclick="showToast('error', 'Sync failed. Check the USB connection.')">Sync failed</button>
+    </div>
+    <div class="demo-group">
+      <p class="demo-group-label">ECG realtime</p>
+      <button onclick="showToast('info', 'All wires are properly connected.')">Wires OK</button>
+      <button onclick="showToast('error', 'The continuous printing has stopped.', 'View printer queue')">Printer stopped</button>
+    </div>
+    <div class="demo-group">
+      <p class="demo-group-label">Patient entry / Settings</p>
+      <button onclick="showToast('success', 'Patient data saved.')">Patient saved</button>
+      <button onclick="showToast('success', 'Password updated.')">Password saved</button>
+    </div>
+    <div class="demo-group">
+      <p class="demo-group-label">Behavior</p>
+      <button onclick="rapidDemo()">Simulate 3 in a row (replace)</button>
+    </div>
+  </div>
+
+  <div class="guidelines">
+    <h2>When to use the toast</h2>
+    <div class="rule-grid">
+
+      <div class="rule-card">
+        <p class="case">Confirm something just happened</p>
+        <p class="detail">"Exam exported." "Settings saved." The action is done — the toast just confirms it.</p>
+      </div>
+
+      <div class="rule-card">
+        <p class="case">Share a status update</p>
+        <p class="detail">"All wires are properly connected." Info the user can see or ignore — doesn't stop what they're doing.</p>
+      </div>
+
+      <div class="rule-card">
+        <p class="case">Report an error the user can retry</p>
+        <p class="detail">"Sync failed." They stay on the same screen and try again — no need to interrupt.</p>
+      </div>
+
+      <div class="rule-card">
+        <p class="case">Give background feedback</p>
+        <p class="detail">"STAT exam pending review." Ambient awareness while eyes stay on the ECG trace.</p>
+      </div>
+
+    </div>
+
+    <h2>Toast vs. pop-up</h2>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <p class="compare-title">Toast</p>
+        <ul class="compare-list">
+          <li>Nothing for the user to decide</li>
+          <li>Rest of the screen keeps working</li>
+          <li>Fits in one short line</li>
+          <li>OK if the user doesn't see it</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <p class="compare-title">Pop-up</p>
+        <ul class="compare-list">
+          <li>User must choose an action ("Delete exam?")</li>
+          <li>Blocks the flow until resolved (password mismatch)</li>
+          <li>Needs more than one line, or has buttons</li>
+          <li>Must be seen and acknowledged</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Rules for this component</h2>
+    <ul class="dont-list">
+      <li><span class="mark">-</span>Only one toast at a time. A new one replaces the current one — never stacks.</li>
+      <li><span class="mark">-</span>One line only — icon + short message, no title.</li>
+      <li><span class="mark">-</span>Auto-dismiss after ~4.5s. No close button needed unless there's an action link.</li>
+      <li><span class="mark">-</span>Position: bottom-center over full-screen content like the ECG trace.</li>
+      <li><span class="mark">-</span>Color lives only in the icon — no colored border or fill.</li>
+    </ul>
+
+    <h2>All states — dark and light mode</h2>
+    <div class="reference-image">
+      <svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif" style="width:100%; max-width:900px; display:block; margin:0 auto 24px; border-radius:8px;">
+        <rect x="0" y="0" width="440" height="620" fill="#131315"/>
+        <text x="24" y="34" font-size="12" fill="#5F5E5A" letter-spacing="0.5">DARK MODE</text>
+
+        <rect x="24" y="56" width="392" height="46" rx="8" fill="#2c2c2e" stroke="#444447" stroke-width="0.5"/>
+        <svg x="39" y="70" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#97C459" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
+        <text x="66" y="83" font-size="13" fill="#F1EFE8">3 exams synced.</text>
+        <text x="24" y="116" font-size="11" fill="#888780">Success — confirms an action already completed.</text>
+
+        <rect x="24" y="140" width="392" height="46" rx="8" fill="#2c2c2e" stroke="#444447" stroke-width="0.5"/>
+        <svg x="39" y="154" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888780" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="8.01"></line><line x1="12" y1="11" x2="12" y2="16"></line></svg>
+        <text x="66" y="167" font-size="13" fill="#F1EFE8">All wires are properly connected.</text>
+        <text x="24" y="200" font-size="11" fill="#888780">Info — passive status update, nothing to act on.</text>
+
+        <rect x="24" y="224" width="392" height="46" rx="8" fill="#2c2c2e" stroke="#444447" stroke-width="0.5"/>
+        <svg x="39" y="238" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FB8500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16" x2="12" y2="16.01"></line></svg>
+        <text x="66" y="251" font-size="13" fill="#F1EFE8">STAT exam pending review.</text>
+        <text x="24" y="284" font-size="11" fill="#888780">Warning — needs attention soon, but not urgent enough to block.</text>
+
+        <rect x="24" y="308" width="392" height="46" rx="8" fill="#2c2c2e" stroke="#444447" stroke-width="0.5"/>
+        <svg x="39" y="322" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F09595" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+        <text x="66" y="335" font-size="13" fill="#F1EFE8">Sync failed. Check the USB connection.</text>
+        <text x="24" y="368" font-size="11" fill="#888780">Error — recoverable failure, user can retry from the same screen.</text>
+
+        <rect x="24" y="400" width="392" height="1" fill="#2c2c2a"/>
+        <text x="24" y="428" font-size="12" fill="#F1EFE8" font-weight="bold">Not a toast:</text>
+        <text x="24" y="450" font-size="11" fill="#888780">Blocking validation, decisions, or anything needing</text>
+        <text x="24" y="466" font-size="11" fill="#888780">more than one line — use a pop-up / modal instead.</text>
+
+        <rect x="460" y="0" width="440" height="620" fill="#FFFFFF"/>
+        <text x="484" y="34" font-size="12" fill="#8C8A80" letter-spacing="0.5">LIGHT MODE</text>
+
+        <rect x="484" y="56" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <svg x="499" y="70" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
+        <text x="526" y="83" font-size="13" fill="#2C2C2A">3 exams synced.</text>
+        <text x="484" y="116" font-size="11" fill="#6B6A64">Success — confirms an action already completed.</text>
+
+        <rect x="484" y="140" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <svg x="499" y="154" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6A64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="8.01"></line><line x1="12" y1="11" x2="12" y2="16"></line></svg>
+        <text x="526" y="167" font-size="13" fill="#2C2C2A">All wires are properly connected.</text>
+        <text x="484" y="200" font-size="11" fill="#6B6A64">Info — passive status update, nothing to act on.</text>
+
+        <rect x="484" y="224" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <svg x="499" y="238" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C46200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16" x2="12" y2="16.01"></line></svg>
+        <text x="526" y="251" font-size="13" fill="#2C2C2A">STAT exam pending review.</text>
+        <text x="484" y="284" font-size="11" fill="#6B6A64">Warning — needs attention soon, but not urgent enough to block.</text>
+
+        <rect x="484" y="308" width="392" height="46" rx="8" fill="#F2F1EC" stroke="#D8D5C9" stroke-width="0.5"/>
+        <svg x="499" y="322" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#993C1D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+        <text x="526" y="335" font-size="13" fill="#2C2C2A">Sync failed. Check the USB connection.</text>
+        <text x="484" y="368" font-size="11" fill="#6B6A64">Error — recoverable failure, user can retry from the same screen.</text>
+
+        <rect x="484" y="400" width="392" height="1" fill="#D9D6CB"/>
+        <text x="484" y="428" font-size="12" fill="#2C2C2A" font-weight="bold">Not a toast:</text>
+        <text x="484" y="450" font-size="11" fill="#6B6A64">Blocking validation, decisions, or anything needing</text>
+        <text x="484" y="466" font-size="11" fill="#6B6A64">more than one line — use a pop-up / modal instead.</text>
+      </svg>
+    </div>
+
+    <h2>Code for dev handoff</h2>
+    <div class="icon-download">
+      <div>
+        <p class="code-label" style="padding:0;">Icons used (SVG)</p>
+        <p style="margin:4px 0 0; font-size:11px; color:#5F5E5A;">success, info, warning, error, close — same paths as the live component</p>
+      </div>
+      <a id="iconDownload" class="copy-btn" download="toast-icons.zip" href="data:application/zip;base64,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" style="text-decoration:none; padding:8px 16px;">Download .zip</a>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <p class="code-label">HTML structure</p>
+        <button class="copy-btn" onclick="copyCode('codeHtml', this)">Copy</button>
+      </div>
+      <pre id="codeHtml"></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <p class="code-label">CSS</p>
+        <button class="copy-btn" onclick="copyCode('codeCss', this)">Copy</button>
+      </div>
+      <pre id="codeCss"></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <p class="code-label">JS (show / auto-dismiss / replace behavior)</p>
+        <button class="copy-btn" onclick="copyCode('codeJs', this)">Copy</button>
+      </div>
+      <pre id="codeJs"></pre>
+    </div>
+  </div>
+
+<script>
+const leads = ['I','II','III','aVR','aVL','aVF','V1','V2','V3','V4','V5','V6'];
+const grid = document.getElementById('ecgGrid');
+leads.forEach(l => {
+  const div = document.createElement('div');
+  div.className = 'lead';
+  div.innerHTML = '<span class="lead-label">' + l + '</span><div class="lead-wave"></div>';
+  grid.appendChild(div);
+});
+
+const svgProps = 'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+const icons = {
+  info: '<svg ' + svgProps + '><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="8.01"></line><line x1="12" y1="11" x2="12" y2="16"></line></svg>',
+  success: '<svg ' + svgProps + '><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>',
+  error: '<svg ' + svgProps + '><circle cx="12" cy="12" r="9"></circle><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>',
+  warning: '<svg ' + svgProps + '><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16" x2="12" y2="16.01"></line></svg>'
+};
+const closeSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>';
+
+let activeToast = null;
+let activeTimer = null;
+
+function showToast(type, message, withAction) {
+  const stack = document.getElementById('toastStack');
+
+  if (activeToast) {
+    clearTimeout(activeTimer);
+    activeToast.remove();
+    activeToast = null;
+  }
+
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML =
+    '<span class="icon">' + icons[type] + '</span>' +
+    '<div class="body">' +
+      '<p class="message">' + message + '</p>' +
+      (withAction ? '<a href="#" class="link">' + withAction + '</a>' : '') +
+    '</div>' +
+    '<span class="close">' + closeSvg + '</span>';
+  stack.appendChild(el);
+  activeToast = el;
+  requestAnimationFrame(() => el.classList.add('show'));
+
+  el.querySelector('.close').onclick = () => dismiss(el);
+
+  activeTimer = setTimeout(() => dismiss(el), 4500);
+
+  function dismiss(node) {
+    node.classList.remove('show');
+    node.classList.add('leaving');
+    setTimeout(() => { if (node.parentNode) node.remove(); if (activeToast === node) activeToast = null; }, 600);
+  }
+}
+
+function rapidDemo() {
+  showToast('info', 'All wires are properly connected.');
+  setTimeout(() => showToast('warning', 'STAT exam pending review.'), 1200);
+  setTimeout(() => showToast('error', 'The continuous printing has stopped.', 'View printer queue'), 2400);
+}
+// --- Dev handoff code snippets ---
+document.getElementById('codeHtml').textContent =
+`<div class="toast-stack" id="toastStack"></div>
+
+<!-- Toast is injected dynamically. Structure per toast: -->
+<div class="toast success">
+  <span class="icon"><!-- svg icon --></span>
+  <div class="body">
+    <p class="message">Message goes here.</p>
+    <!-- optional action link -->
+    <a href="#" class="link">Action label</a>
+  </div>
+  <span class="close"><!-- svg close icon --></span>
+</div>`;
+
+document.getElementById('codeCss').textContent =
+`.toast-stack {
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  z-index: 10;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #2c2c2e;
+  border: 0.5px solid #444447;
+  border-radius: 8px;
+  padding: 10px 14px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.toast.show { opacity: 1; }
+
+.toast .icon { display: flex; flex-shrink: 0; }
+.toast .body {
+  flex: 1;
+  overflow: hidden;
+}
+.toast .message { margin: 0; font-size: 13px; color: #F1EFE8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toast .close { display: flex; color: #5F5E5A; cursor: pointer; flex-shrink: 0; }
+.toast .link { color: #F1EFE8; text-decoration: underline; font-size: 12px; }
+
+/* Icon color = only severity signal */
+.toast.info .icon    { color: #888780; }
+.toast.success .icon { color: #97C459; }
+.toast.error .icon   { color: #F09595; }
+.toast.warning .icon { color: #FB8500; }`;
+
+document.getElementById('codeJs').textContent =
+`let activeToast = null;
+let activeTimer = null;
+
+function showToast(type, message, withAction) {
+  const stack = document.getElementById('toastStack');
+
+  // Replace, never stack
+  if (activeToast) {
+    clearTimeout(activeTimer);
+    activeToast.remove();
+    activeToast = null;
+  }
+
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML =
+    '<span class="icon">' + getIcon(type) + '</span>' +
+    '<div class="body">' +
+      '<p class="message">' + message + '</p>' +
+      (withAction ? '<a href="#" class="link">' + withAction + '</a>' : '') +
+    '</div>' +
+    '<span class="close">' + closeIcon + '</span>';
+
+  stack.appendChild(el);
+  activeToast = el;
+  requestAnimationFrame(() => el.classList.add('show'));
+
+  el.querySelector('.close').onclick = () => dismiss(el);
+  activeTimer = setTimeout(() => dismiss(el), 4500); // auto-dismiss ~4.5s
+
+  function dismiss(node) {
+    node.classList.remove('show');
+    setTimeout(() => {
+      if (node.parentNode) node.remove();
+      if (activeToast === node) activeToast = null;
+    }, 600); // matches CSS transition duration
+  }
+}
+
+// Usage:
+// showToast('success', '3 exams synced.');
+// showToast('error', 'Sync failed. Check the USB connection.');
+// showToast('info', 'All wires are properly connected.');
+// showToast('error', 'The continuous printing has stopped.', 'View printer queue');
+// showToast('warning', 'STAT exam pending review.');`;
+function copyCode(id, btn) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('copied');
+    }, 1500);
+  });
+}
+</script>
+
+</body>
+</html>
