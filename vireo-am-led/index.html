@@ -1,4 +1,4 @@
-<title>Vireo AM LED Options</title>
+<title>Vireo AM LED Final</title>
 <style>
 :root{
   --bg:#eef0f2;
@@ -36,28 +36,17 @@ body{
   background:var(--bg);
   color:var(--text);
   font-family:"Inter",system-ui,-apple-system,Segoe UI,sans-serif;
-  padding:40px 20px 60px;
-}
-
-header{ max-width:940px; margin:0 auto 28px; }
-h1{ font-size:20px; margin:0 0 6px; text-wrap:balance; }
-header p{ margin:0; color:var(--muted); font-size:13.5px; line-height:1.6; max-width:66ch; }
-
-.section-title{
-  max-width:940px; margin:0 auto 12px;
-  font-family:"JetBrains Mono",ui-monospace,monospace;
-  font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
-}
-.section-title:not(:first-of-type){ margin-top:30px; }
-
-.grid{
-  max-width:940px; margin:0 auto; display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:16px;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px 20px;
 }
 
 .card{
   background:var(--panel); border:1px solid var(--panel-border); border-radius:14px;
-  padding:20px 16px 16px; display:flex; flex-direction:column; align-items:center; gap:12px;
+  padding:24px 20px 20px; display:flex; flex-direction:column; align-items:center; gap:14px;
+  max-width:260px;
 }
 .tag{
   font-family:"JetBrains Mono",ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em;
@@ -68,217 +57,53 @@ header p{ margin:0; color:var(--muted); font-size:13.5px; line-height:1.6; max-w
 .device{ position:relative; width:170px; aspect-ratio:553/1269; }
 .device > img{ position:absolute; display:block; }
 .device > img:first-child{ inset:0; width:100%; height:100%; }
-/* real LED size — matches the photographed arc exactly, in % of the device box; never scaled up.
-   Atualizado: o LED azul fica na posição de cima do anel (onde antes era o verde). */
+
+/* LED real, tamanho exato da foto do produto, posição de cima do anel */
 .arc{ left:42.13%; top:63.59%; width:17.18%; height:3.0%; }
+.arc{ animation:hardBlink 1.8s steps(1,end) infinite; }
+@keyframes hardBlink{ 0%,49%{ opacity:0; } 50%,100%{ opacity:1; } }
 
-/* 1: seco */
-.blink .arc{ animation:hardBlink 1.8s steps(1,end) infinite; }
-@keyframes hardBlink{ 0%,49%{opacity:0;} 50%,100%{opacity:1;} }
-
-/* 2: respiracao suave — só opacidade, tamanho real preservado, sem brilho que "engorde" a linha */
-.breathe .arc{ animation:breathe 2.4s ease-in-out infinite; }
-@keyframes breathe{ 0%,100%{ opacity:.18; } 50%{ opacity:1; } }
-
-/* 3: escala sutil — o aparelho inteiro "respira" (100%→102%), LED pisca seco por baixo */
-.scaleBreath .device{ animation:deviceScale 3s ease-in-out infinite; }
-@keyframes deviceScale{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.02); } }
-
-/* 4: flutuação — sobe e desce poucos pixels, bem devagar */
-.float .device{ animation:deviceFloat 3.6s ease-in-out infinite; }
-@keyframes deviceFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
-
-/* 5: fade suave do aparelho inteiro — opacidade só, sem transform (amplitude maior p/ ficar visível) */
-.fadeDevice .device{ animation:deviceFade 2.6s ease-in-out infinite; }
-@keyframes deviceFade{ 0%,100%{ opacity:1; } 50%{ opacity:.72; } }
-
-/* 6: giro oblíquo — o aparelho "vira" de leve pro lado, efeito 3D (rotateY), não é uma rotação plana */
-.oblique .stage{ perspective:650px; }
-.oblique .device{ animation:deviceOblique 4s ease-in-out infinite; }
-@keyframes deviceOblique{
-  0%,100%{ transform:rotateY(-10deg); }
-  50%{ transform:rotateY(10deg); }
+/* aparelho: dois pulsos de escala ao entrar, depois fica parado (estável) em scale(1) */
+.device{
+  animation:deviceTwoPulses 3.2s ease-in-out 1;
+  animation-fill-mode:forwards;
 }
-
-/* opção 18: sequência de etapas reais do pareamento — o LED se comporta diferente em cada fase, sincronizado com o texto */
-.stages .arc{ animation:arcStages 7s steps(1,end) infinite; }
-@keyframes arcStages{
-  0%     { opacity:.2; }
-  7%     { opacity:1;  }
-  14%    { opacity:.2; }
-  21%    { opacity:1;  }
-  28%    { opacity:.2; }
-  35%    { opacity:1;  }
-  42.8%  { opacity:1;  }  /* dispositivo encontrado: aceso firme, sem piscar */
-  64.29% { opacity:1;  }
-  64.3%  { opacity:0;  }  /* conectando: pisca rápido */
-  68%    { opacity:1;  }
-  72%    { opacity:0;  }
-  76%    { opacity:1;  }
-  80%    { opacity:0;  }
-  84%    { opacity:1;  }
-  88%    { opacity:0;  }
-  92%    { opacity:1;  }
-  96%    { opacity:0;  }
-  100%   { opacity:.2; }
+@keyframes deviceTwoPulses{
+  0%    { transform:scale(1);     }
+  25%   { transform:scale(1.03);  }
+  50%   { transform:scale(1);     }
+  75%   { transform:scale(1.03);  }
+  100%  { transform:scale(1);     }
 }
-
-.status-strip{ position:relative; height:20px; width:100%; text-align:center; }
-.status-strip .phase{
-  position:absolute; inset:0; opacity:0; font-size:13px; font-weight:500;
-}
-.status-strip .p1{ animation:phaseText1 7s steps(1,end) infinite; }
-.status-strip .p2{ animation:phaseText2 7s steps(1,end) infinite; color:var(--accent); }
-.status-strip .p3{ animation:phaseText3 7s steps(1,end) infinite; }
-@keyframes phaseText1{ 0%,42.79%{ opacity:1; } 42.8%,100%{ opacity:0; } }
-@keyframes phaseText2{ 0%,42.79%{ opacity:0; } 42.8%,64.29%{ opacity:1; } 64.3%,100%{ opacity:0; } }
-@keyframes phaseText3{ 0%,64.29%{ opacity:0; } 64.3%,100%{ opacity:1; } }
 
 @media (prefers-reduced-motion: reduce){
-  .arc, .device{ animation:none !important; opacity:1 !important; transform:none !important; }
-  .status-strip .phase{ animation:none !important; }
-  .status-strip .p1{ opacity:1; }
-  .status-strip .p2, .status-strip .p3{ opacity:0; }
+  .arc{ animation:none !important; opacity:1 !important; }
+  .device{ animation:none !important; transform:none !important; }
 }
 
-.label{ font-size:13.5px; font-weight:600; }
-.desc{ font-size:12px; line-height:1.5; color:var(--muted); text-align:center; }
+.label{ font-size:14px; font-weight:600; }
+.desc{ font-size:12px; line-height:1.55; color:var(--muted); text-align:center; }
 .desc code{
   font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px;
   background:var(--mono-chip); padding:0 4px; border-radius:4px; color:var(--text);
 }
-
-footer{
-  max-width:940px; margin:32px auto 0; padding-top:18px; border-top:1px solid var(--panel-border);
-  font-size:12.5px; line-height:1.6; color:var(--muted);
-}
-footer b{ color:var(--text); font-weight:600; }
 </style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 
-<header>
-  <h1>Vireo AM — opções de piscar do LED azul</h1>
-  <p>
-    Fundo transparente (sem xadrez de demonstração — o PNG já é alfa de verdade,
-    ele só assume a cor do painel onde for colocado). LED verde apagado em
-    todas as opções. Em todas elas a base do aparelho <b>nunca troca de
-    imagem</b> — apenas o recorte do arco azul (<code>led-arc-blue.png</code>)
-    se move/anima sobre <code>led-off-transparent.png</code>.
-  </p>
-</header>
-
-<div class="grid">
-  <div class="card blink">
-    <span class="tag">Opção 1</span>
-    <div class="stage">
-      <div class="device">
-        <img src="led-off-transparent.png" alt="Vireo AM">
-        <img class="arc" src="led-arc-blue.png" alt="">
-      </div>
+<div class="card">
+  <span class="tag">Vireo AM · pareamento</span>
+  <div class="stage">
+    <div class="device">
+      <img src="led-off-transparent.png" alt="Vireo AM">
+      <img class="arc" src="led-arc-blue.png" alt="">
     </div>
-    <div class="label">Piscar seco (on/off)</div>
-    <div class="desc">Troca abrupta de opacidade. Estático entre os estados.</div>
   </div>
-
-  <div class="card breathe">
-    <span class="tag">Opção 2</span>
-    <div class="stage">
-      <div class="device">
-        <img src="led-off-transparent.png" alt="Vireo AM">
-        <img class="arc" src="led-arc-blue.png" alt="">
-      </div>
-    </div>
-    <div class="label">Respiração suave</div>
-    <div class="desc">Só opacidade, tamanho real do LED preservado — sem brilho que aumente a linha.</div>
-  </div>
-
-  <div class="card scaleBreath blink">
-    <span class="tag">Opção 3</span>
-    <div class="stage">
-      <div class="device">
-        <img src="led-off-transparent.png" alt="Vireo AM">
-        <img class="arc" src="led-arc-blue.png" alt="">
-      </div>
-    </div>
-    <div class="label">Escala sutil</div>
-    <div class="desc">O aparelho inteiro cresce e encolhe muito pouco (100%→102%) — LED continua piscando seco.</div>
-  </div>
-
-  <div class="card float blink">
-    <span class="tag">Opção 4</span>
-    <div class="stage">
-      <div class="device">
-        <img src="led-off-transparent.png" alt="Vireo AM">
-        <img class="arc" src="led-arc-blue.png" alt="">
-      </div>
-    </div>
-    <div class="label">Flutuação</div>
-    <div class="desc">Sobe e desce poucos pixels, bem devagar — como se estivesse "esperando ativamente".</div>
-  </div>
-
-  <div class="card fadeDevice blink">
-    <span class="tag">Opção 5</span>
-    <div class="stage">
-      <div class="device">
-        <img src="led-off-transparent.png" alt="Vireo AM">
-        <img class="arc" src="led-arc-blue.png" alt="">
-      </div>
-    </div>
-    <div class="label">Fade suave do aparelho</div>
-    <div class="desc">O aparelho inteiro escurece até ~72% de opacidade e volta a 100%, num ciclo contínuo de 2.6s — repare o corpo do aparelho clareando/escurecendo, sem mover nada.</div>
-  </div>
-
-  <div class="card oblique blink">
-    <span class="tag">Opção 6</span>
-    <div class="stage">
-      <div class="device">
-        <img src="led-off-transparent.png" alt="Vireo AM">
-        <img class="arc" src="led-arc-blue.png" alt="">
-      </div>
-    </div>
-    <div class="label">Giro oblíquo</div>
-    <div class="desc">Vira de leve pro lado em 3D (rotateY, não rotação plana) — dá pra ver o aparelho girando levemente da direita pra esquerda e voltando.</div>
-  </div>
-
-</div>
-
-<div class="section-title">Opção 18 — sequência de etapas reais</div>
-<div class="grid" style="max-width:420px;">
-  <div class="card stages">
-    <div class="stage">
-      <div class="device">
-        <img src="led-off-transparent.png" alt="Vireo AM">
-        <img class="arc" src="led-arc-blue.png" alt="">
-      </div>
-    </div>
-    <div class="status-strip">
-      <span class="phase p1">Procurando dispositivo…</span>
-      <span class="phase p2">Dispositivo encontrado</span>
-      <span class="phase p3">Conectando…</span>
-    </div>
-    <div class="desc">
-      Ciclo de 7s dividido em 3 fases reais do pareamento — o LED muda de
-      comportamento junto com o texto: <b>pisca devagar</b> procurando →
-      <b>fica aceso firme</b> ao encontrar → <b>pisca rápido</b> conectando.
-      (Loop de demonstração — no software real cada fase dura o tempo que a
-      etapa realmente levar.)
-    </div>
+  <div class="label">Escala sutil — 2 pulsos</div>
+  <div class="desc">
+    Ao abrir o modal, o aparelho dá <b>2 pulsos</b> de escala (100%→103%→100%,
+    duas vezes) e então fica <b>estável</b>, parado em tamanho normal — só o
+    LED azul continua piscando. Atualize a página pra ver o início de novo.
   </div>
 </div>
-
-<footer>
-  <b>Arquivos:</b> <code>led-off-transparent.png</code> (base, fundo alfa) ·
-  <code>led-arc-blue.png</code> (recorte do arco azul, no tamanho real da foto do produto).
-  Todo o posicionamento é em <b>%</b> do tamanho do <code>.device</code>
-  (<code>aspect-ratio:553/1269</code>) — funciona igual em qualquer tamanho
-  que o dispositivo seja renderizado no software, sem recalcular pixels.
-  Opções 3–6 animam só <code>transform</code>/<code>opacity</code> no
-  próprio aparelho (sem <code>blur</code>/<code>filter</code>, sem elementos
-  extras) — leve pra qualquer engine renderizar, o LED azul continua
-  piscando exatamente como nas opções 1–2.
-  <b>Atualização:</b> o LED azul agora fica na posição de cima do anel
-  (onde antes estava o verde apagado) — <code>led-arc-blue.png</code> foi
-  regerado nessa posição e o CSS (<code>top:63.59%</code>) foi ajustado.
-</footer>
