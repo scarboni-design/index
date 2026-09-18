@@ -1,4 +1,4 @@
-<title>Vireo AM LED Final</title>
+<title>Vireo AM Pairing Animation</title>
 <style>
 :root{
   --bg:#eef0f2;
@@ -7,27 +7,36 @@
   --text:#1b1d20;
   --muted:#666c73;
   --accent:#3f5fa8;
+  --accent-ink:#ffffff;
   --mono-chip:#f1f2f4;
+  --code-bg:#f6f7f8;
+  --code-border:#e1e3e6;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#151619;
+    --bg:#141518;
     --panel:#1e2024;
     --panel-border:#2b2e33;
     --text:#eceef0;
     --muted:#9aa0a7;
     --accent:#7fa0ec;
+    --accent-ink:#12141a;
     --mono-chip:#26282d;
+    --code-bg:#1a1c20;
+    --code-border:#2b2e33;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#151619;
+  --bg:#141518;
   --panel:#1e2024;
   --panel-border:#2b2e33;
   --text:#eceef0;
   --muted:#9aa0a7;
   --accent:#7fa0ec;
+  --accent-ink:#12141a;
   --mono-chip:#26282d;
+  --code-bg:#1a1c20;
+  --code-border:#2b2e33;
 }
 
 *{box-sizing:border-box;}
@@ -36,74 +45,263 @@ body{
   background:var(--bg);
   color:var(--text);
   font-family:"Inter",system-ui,-apple-system,Segoe UI,sans-serif;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:40px 20px;
+  padding:48px 20px 72px;
 }
 
-.card{
-  background:var(--panel); border:1px solid var(--panel-border); border-radius:14px;
-  padding:24px 20px 20px; display:flex; flex-direction:column; align-items:center; gap:14px;
-  max-width:260px;
+.wrap{ max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:36px; }
+
+/* ---------- preview ---------- */
+.preview{
+  background:var(--panel); border:1px solid var(--panel-border); border-radius:16px;
+  padding:32px 24px 24px; display:flex; flex-direction:column; align-items:center; gap:16px;
 }
-.tag{
-  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:10.5px; letter-spacing:.06em;
+.eyebrow{
+  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.08em;
   text-transform:uppercase; color:var(--muted); align-self:flex-start;
 }
-
 .stage{ width:170px; position:relative; display:flex; align-items:flex-start; justify-content:center; }
 .device{ position:relative; width:170px; aspect-ratio:553/1269; }
 .device > img{ position:absolute; display:block; }
 .device > img:first-child{ inset:0; width:100%; height:100%; }
 
-/* LED real, tamanho exato da foto do produto, posição de cima do anel */
 .arc{ left:42.13%; top:63.59%; width:17.18%; height:3.0%; }
 .arc{ animation:hardBlink 1.8s steps(1,end) infinite; }
 @keyframes hardBlink{ 0%,49%{ opacity:0; } 50%,100%{ opacity:1; } }
 
-/* aparelho: dois pulsos de escala ao entrar, depois fica parado (estável) em scale(1) */
-.device{
-  animation:deviceTwoPulses 3.2s ease-in-out 1;
-  animation-fill-mode:forwards;
-}
+.device.pulse{ animation:deviceTwoPulses 3.2s ease-in-out 1; animation-fill-mode:forwards; }
 @keyframes deviceTwoPulses{
-  0%    { transform:scale(1);     }
-  25%   { transform:scale(1.03);  }
-  50%   { transform:scale(1);     }
-  75%   { transform:scale(1.03);  }
-  100%  { transform:scale(1);     }
+  0%   { transform:scale(1);    }
+  25%  { transform:scale(1.03); }
+  50%  { transform:scale(1);    }
+  75%  { transform:scale(1.03); }
+  100% { transform:scale(1);    }
 }
 
 @media (prefers-reduced-motion: reduce){
   .arc{ animation:none !important; opacity:1 !important; }
-  .device{ animation:none !important; transform:none !important; }
+  .device.pulse{ animation:none !important; transform:none !important; }
 }
 
 .label{ font-size:14px; font-weight:600; }
-.desc{ font-size:12px; line-height:1.55; color:var(--muted); text-align:center; }
-.desc code{
-  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px;
-  background:var(--mono-chip); padding:0 4px; border-radius:4px; color:var(--text);
+.desc{ font-size:12.5px; line-height:1.55; color:var(--muted); text-align:center; max-width:38ch; }
+
+.replay-btn{
+  appearance:none; border:1px solid var(--panel-border); background:var(--mono-chip); color:var(--text);
+  font:inherit; font-size:13px; font-weight:600; padding:9px 16px; border-radius:9px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
 }
+.replay-btn:hover{ border-color:var(--accent); }
+.replay-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.replay-btn svg{ width:14px; height:14px; }
+
+/* ---------- dev section ---------- */
+.dev{ display:flex; flex-direction:column; gap:20px; }
+.dev h2{ font-size:16px; margin:0; }
+.dev > p{ margin:0; color:var(--muted); font-size:13px; line-height:1.6; max-width:64ch; }
+
+.spec{
+  background:var(--panel); border:1px solid var(--panel-border); border-radius:12px;
+  padding:16px 18px; display:grid; grid-template-columns:max-content 1fr; gap:8px 16px;
+  font-size:13px;
+}
+.spec dt{ color:var(--muted); font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11.5px; }
+.spec dd{ margin:0; }
+.spec code{
+  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12px;
+  background:var(--mono-chip); padding:1px 5px; border-radius:4px;
+}
+
+.code-block{
+  background:var(--code-bg); border:1px solid var(--code-border); border-radius:12px; overflow:hidden;
+}
+.code-block .code-head{
+  display:flex; align-items:center; justify-content:space-between; padding:9px 14px;
+  border-bottom:1px solid var(--code-border);
+  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11.5px; color:var(--muted);
+  letter-spacing:.03em; text-transform:uppercase;
+}
+.copy-btn{
+  appearance:none; border:1px solid var(--code-border); background:var(--panel); color:var(--text);
+  font:inherit; font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:7px; cursor:pointer;
+  font-family:"Inter",sans-serif; text-transform:none; letter-spacing:0;
+}
+.copy-btn:hover{ border-color:var(--accent); }
+.copy-btn.copied{ color:var(--accent); border-color:var(--accent); }
+pre{
+  margin:0; padding:16px 18px; overflow-x:auto;
+  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12.5px; line-height:1.6;
+}
+pre code{ font-family:inherit; }
+
+footer{ font-size:12px; color:var(--muted); line-height:1.6; }
 </style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 
-<div class="card">
-  <span class="tag">Vireo AM · pareamento</span>
-  <div class="stage">
-    <div class="device">
-      <img src="led-off-transparent.png" alt="Vireo AM">
-      <img class="arc" src="led-arc-blue.png" alt="">
+<div class="wrap">
+
+  <div class="preview">
+    <span class="eyebrow">Vireo AM · pairing</span>
+    <div class="stage">
+      <div class="device pulse" id="device">
+        <img src="led-off-transparent.png" alt="Vireo AM">
+        <img class="arc" src="led-arc-blue.png" alt="">
+      </div>
     </div>
+    <div class="label">Subtle scale — 2 pulses</div>
+    <div class="desc">
+      On open, the device gives <b>2 scale pulses</b> (100%→103%→100%, twice)
+      then settles and stays <b>stable</b> at normal size — only the blue LED
+      keeps blinking.
+    </div>
+    <button class="replay-btn" id="replayBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      Replay animation
+    </button>
   </div>
-  <div class="label">Escala sutil — 2 pulsos</div>
-  <div class="desc">
-    Ao abrir o modal, o aparelho dá <b>2 pulsos</b> de escala (100%→103%→100%,
-    duas vezes) e então fica <b>estável</b>, parado em tamanho normal — só o
-    LED azul continua piscando. Atualize a página pra ver o início de novo.
+
+  <div class="dev">
+    <h2>For developers</h2>
+    <p>
+      Everything below is copy-ready. The LED is a separate cropped sprite
+      layered on top of a fixed base image — the base never changes, so there
+      is no frame swap and nothing shifts. All positioning is in percent of
+      the device box, so it holds at any render size.
+    </p>
+
+    <dl class="spec">
+      <dt>base image</dt>
+      <dd><code>led-off-transparent.png</code> — full device, transparent background, both LEDs off</dd>
+      <dt>LED sprite</dt>
+      <dd><code>led-arc-blue.png</code> — cropped blue arc only, transparent everywhere else, real photographed size</dd>
+      <dt>device box</dt>
+      <dd><code>aspect-ratio: 553 / 1269</code> (the source photo's ratio)</dd>
+      <dt>LED position</dt>
+      <dd><code>left: 42.13%; top: 63.59%; width: 17.18%; height: 3.0%</code></dd>
+      <dt>LED blink</dt>
+      <dd>hard on/off, <code>1.8s</code> cycle, <code>steps(1, end)</code></dd>
+      <dt>device pulse</dt>
+      <dd>2 scale pulses (100%→103%), <code>3.2s</code> total, runs once, ends stable</dd>
+      <dt>motion</dt>
+      <dd>only <code>transform</code>/<code>opacity</code> — no <code>blur</code>/<code>filter</code>, no extra DOM elements</dd>
+      <dt>a11y</dt>
+      <dd>respects <code>prefers-reduced-motion: reduce</code> (see CSS)</dd>
+    </dl>
+
+    <div class="code-block">
+      <div class="code-head">
+        <span>HTML</span>
+        <button class="copy-btn" data-target="code-html" type="button">Copy</button>
+      </div>
+      <pre><code id="code-html">&lt;div class="device pulse" id="device"&gt;
+  &lt;img src="led-off-transparent.png" alt="Vireo AM"&gt;
+  &lt;img class="arc" src="led-arc-blue.png" alt=""&gt;
+&lt;/div&gt;
+
+&lt;button id="replayBtn" type="button"&gt;Replay animation&lt;/button&gt;</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head">
+        <span>CSS</span>
+        <button class="copy-btn" data-target="code-css" type="button">Copy</button>
+      </div>
+      <pre><code id="code-css">.device {
+  position: relative;
+  width: 170px;                 /* any width works */
+  aspect-ratio: 553 / 1269;      /* source photo ratio — keep this */
+}
+.device > img {
+  position: absolute;
+  display: block;
+}
+.device > img:first-child {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* LED sprite: real size/position of the photographed arc, in % of .device */
+.arc {
+  left: 42.13%;
+  top: 63.59%;
+  width: 17.18%;
+  height: 3.0%;
+  animation: hardBlink 1.8s steps(1, end) infinite;
+}
+@keyframes hardBlink {
+  0%, 49%   { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
+/* device: 2 pulses on load, then stays stable */
+.device.pulse {
+  animation: deviceTwoPulses 3.2s ease-in-out 1;
+  animation-fill-mode: forwards;
+}
+@keyframes deviceTwoPulses {
+  0%   { transform: scale(1);    }
+  25%  { transform: scale(1.03); }
+  50%  { transform: scale(1);    }
+  75%  { transform: scale(1.03); }
+  100% { transform: scale(1);    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc              { animation: none !important; opacity: 1 !important; }
+  .device.pulse     { animation: none !important; transform: none !important; }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head">
+        <span>JS (replay button)</span>
+        <button class="copy-btn" data-target="code-js" type="button">Copy</button>
+      </div>
+      <pre><code id="code-js">const device = document.getElementById('device');
+document.getElementById('replayBtn').addEventListener('click', () => {
+  device.classList.remove('pulse');
+  void device.offsetWidth;   // force reflow so the animation can restart
+  device.classList.add('pulse');
+});</code></pre>
+    </div>
+
+    <footer>
+      Files: <code>led-off-transparent.png</code>, <code>led-arc-blue.png</code>.
+      The green LED has been permanently removed from both frames (it does not
+      exist in this state of the product).
+    </footer>
   </div>
+
 </div>
+
+<script>
+const device = document.getElementById('device');
+document.getElementById('replayBtn').addEventListener('click', () => {
+  device.classList.remove('pulse');
+  void device.offsetWidth;
+  device.classList.add('pulse');
+});
+
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const target = document.getElementById(btn.dataset.target);
+    const text = target.innerText;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+  });
+});
+</script>
